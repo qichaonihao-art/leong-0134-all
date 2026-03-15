@@ -664,19 +664,20 @@ async function handleVolcTts(req, res) {
 }
 
 async function handleVolcVoiceClone(req, res) {
+  const upstreamUrl = 'https://openspeech.bytedance.com/api/v3/tts/voice_clone';
   try {
     const body = await readRequestBody(req);
-    const { appKey, accessKey, speakerId, resourceId, audioData, audioFormat } = body;
-    const resolvedAppKey = readValue(appKey, SERVER_CONFIG.volcAppKey);
-    const resolvedAccessKey = readValue(accessKey, SERVER_CONFIG.volcAccessKey);
+    const { speakerId, resourceId, audioData, audioFormat } = body;
+    const resolvedAppKey = readValue(SERVER_CONFIG.volcAppKey);
+    const resolvedAccessKey = readValue(SERVER_CONFIG.volcAccessKey);
     const resolvedSpeakerId = readValue(speakerId, SERVER_CONFIG.volcSpeakerId);
 
     if (!resolvedAppKey || !resolvedAccessKey || !resolvedSpeakerId || !audioData) {
-      sendJson(res, 400, { error: '缺少火山引擎 App Key、Access Key、Speaker ID 或音频数据' });
+      sendJson(res, 400, { error: '缺少火山引擎服务端环境变量或必要业务参数（speakerId / audioData）' });
       return;
     }
 
-    const response = await fetch('https://openspeech.bytedance.com/api/v3/tts/voice_clone', {
+    const response = await fetch(upstreamUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -698,18 +699,44 @@ async function handleVolcVoiceClone(req, res) {
       })
     });
 
-    const json = await response.json();
+    const responseText = await response.text();
+    let json = null;
+    try {
+      json = responseText ? JSON.parse(responseText) : null;
+    } catch {}
+
     if (!response.ok) {
+      console.error('[volc voice clone] upstream non-200 response', {
+        url: upstreamUrl,
+        status: response.status,
+        body: responseText
+      });
       sendJson(res, response.status, {
-        error: json.message || json.code || '火山引擎训练请求失败',
-        raw: json
+        error: json?.message || json?.code || `火山引擎训练请求失败，上游状态码 ${response.status}`,
+        debug: {
+          upstreamUrl,
+          upstreamStatus: response.status,
+          upstreamBody: responseText
+        }
       });
       return;
     }
 
-    sendJson(res, 200, json);
+    sendJson(res, 200, json || { raw: responseText });
   } catch (error) {
-    sendJson(res, 500, { error: error.message || '火山引擎训练请求失败' });
+    console.error('[volc voice clone] fetch error', {
+      url: upstreamUrl,
+      message: error.message,
+      stack: error.stack
+    });
+    sendJson(res, 500, {
+      error: error.message || '火山引擎训练请求失败',
+      debug: {
+        upstreamUrl,
+        fetchMessage: error.message || '',
+        fetchStack: error.stack || ''
+      }
+    });
   }
 }
 
