@@ -1,3 +1,4 @@
+// github desktop test
 window.APP_CONFIG = {
   // 线上部署时可改成你的代理域名，例如 https://voice-proxy.example.com
   // 留空时：
