@@ -1,5 +1,6 @@
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
+import { randomBytes, timingSafeEqual } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { WebSocket } from 'ws';
@@ -10,6 +11,9 @@ const AI_DIR = path.join(__dirname, 'ai');
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '127.0.0.1';
 const CORS_ALLOW_ORIGIN = process.env.CORS_ALLOW_ORIGIN || '*';
+const APP_LOGIN_PASSWORD = process.env.APP_LOGIN_PASSWORD || '';
+const AUTH_COOKIE_NAME = 'auth_token';
+const authSessions = new Map();
 
 const SERVER_CONFIG = {
   aliyunApiKey: process.env.ALIYUN_API_KEY || '',
@@ -39,7 +43,7 @@ function sendJson(res, statusCode, payload) {
 
 function getAllowedOrigin(origin) {
   if (!origin) return '*';
-  if (CORS_ALLOW_ORIGIN === '*') return '*';
+  if (CORS_ALLOW_ORIGIN === '*') return origin;
 
   const allowedOrigins = CORS_ALLOW_ORIGIN
     .split(',')
@@ -57,6 +61,104 @@ function setCorsHeaders(req, res) {
   res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,POST,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+}
+
+function parseCookies(req) {
+  const raw = req.headers.cookie || '';
+  return raw.split(';').reduce((acc, item) => {
+    const trimmed = item.trim();
+    if (!trimmed) return acc;
+    const eqIndex = trimmed.indexOf('=');
+    const key = eqIndex >= 0 ? trimmed.slice(0, eqIndex).trim() : trimmed;
+    const value = eqIndex >= 0 ? trimmed.slice(eqIndex + 1).trim() : '';
+    if (key) acc[key] = decodeURIComponent(value);
+    return acc;
+  }, {});
+}
+
+function shouldUseSecureCookie(req) {
+  if (req.headers['x-forwarded-proto'] === 'https') return true;
+  const origin = req.headers.origin || '';
+  const referer = req.headers.referer || '';
+  return origin.startsWith('https://') || referer.startsWith('https://');
+}
+
+function serializeAuthCookie(token, req) {
+  const parts = [
+    `${AUTH_COOKIE_NAME}=${encodeURIComponent(token)}`,
+    'HttpOnly',
+    'Path=/',
+    'SameSite=Lax'
+  ];
+  if (shouldUseSecureCookie(req)) parts.push('Secure');
+  return parts.join('; ');
+}
+
+function clearAuthCookie(res, req) {
+  const parts = [
+    `${AUTH_COOKIE_NAME}=`,
+    'HttpOnly',
+    'Path=/',
+    'SameSite=Lax',
+    'Max-Age=0'
+  ];
+  if (shouldUseSecureCookie(req)) parts.push('Secure');
+  res.setHeader('Set-Cookie', parts.join('; '));
+}
+
+function getAuthTokenFromRequest(req) {
+  const cookies = parseCookies(req);
+  const token = cookies[AUTH_COOKIE_NAME];
+  if (!token) return '';
+  return authSessions.has(token) ? token : '';
+}
+
+function isAuthenticated(req) {
+  return !!getAuthTokenFromRequest(req);
+}
+
+function passwordsMatch(input, expected) {
+  const left = Buffer.from(String(input || ''), 'utf8');
+  const right = Buffer.from(String(expected || ''), 'utf8');
+  if (left.length !== right.length) return false;
+  return timingSafeEqual(left, right);
+}
+
+async function handleAuthLogin(req, res) {
+  if (!APP_LOGIN_PASSWORD) {
+    sendJson(res, 500, { error: '服务端未配置 APP_LOGIN_PASSWORD' });
+    return;
+  }
+
+  try {
+    const body = await readRequestBody(req);
+    if (!passwordsMatch(body.password, APP_LOGIN_PASSWORD)) {
+      sendJson(res, 401, { error: '密码错误' });
+      return;
+    }
+
+    const oldToken = getAuthTokenFromRequest(req);
+    if (oldToken) authSessions.delete(oldToken);
+
+    const token = randomBytes(32).toString('hex');
+    authSessions.set(token, { createdAt: Date.now() });
+    res.setHeader('Set-Cookie', serializeAuthCookie(token, req));
+    sendJson(res, 200, { ok: true });
+  } catch (error) {
+    sendJson(res, 400, { error: error.message || '登录失败' });
+  }
+}
+
+function handleAuthStatus(req, res) {
+  sendJson(res, 200, { ok: true, authenticated: isAuthenticated(req) });
+}
+
+function handleAuthLogout(req, res) {
+  const token = getAuthTokenFromRequest(req);
+  if (token) authSessions.delete(token);
+  clearAuthCookie(res, req);
+  sendJson(res, 200, { ok: true });
 }
 
 function readValue(...candidates) {
@@ -802,6 +904,27 @@ const server = createServer(async (req, res) => {
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
     res.end();
+    return;
+  }
+
+  const isAuthRoute = url.pathname === '/api/auth/login' || url.pathname === '/api/auth/status' || url.pathname === '/api/auth/logout';
+  if (req.method === 'POST' && url.pathname === '/api/auth/login') {
+    await handleAuthLogin(req, res);
+    return;
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/auth/status') {
+    handleAuthStatus(req, res);
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/auth/logout') {
+    handleAuthLogout(req, res);
+    return;
+  }
+
+  if (url.pathname.startsWith('/api/') && !isAuthRoute && !isAuthenticated(req)) {
+    sendJson(res, 401, { error: '未登录或登录已失效' });
     return;
   }
 

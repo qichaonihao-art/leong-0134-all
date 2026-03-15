@@ -38,10 +38,63 @@
       min-height: 100vh;
       padding: 28px 16px 40px;
     }
+    body.auth-locked {
+      overflow: hidden;
+    }
     .page {
       max-width: 860px;
       margin: 0 auto;
       position: relative;
+    }
+    .app-shell.hidden {
+      display: none;
+    }
+    .auth-screen {
+      min-height: calc(100vh - 68px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .auth-screen.show {
+      display: flex;
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 420px;
+      padding: 28px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.26);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 30px 80px rgba(15,23,42,0.22);
+    }
+    .auth-card h2 {
+      color: #fff;
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    .auth-card p {
+      color: rgba(255,255,255,0.76);
+      font-size: 14px;
+      line-height: 1.7;
+      margin-bottom: 18px;
+    }
+    .auth-card .field label {
+      color: #f8fafc;
+    }
+    .auth-card .field input {
+      background: rgba(255,255,255,0.94);
+    }
+    .auth-error {
+      min-height: 22px;
+      color: #fee2e2;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+    .auth-loading {
+      color: rgba(255,255,255,0.72);
+      font-size: 13px;
+      margin-top: 10px;
     }
     .page::before,
     .page::after {
@@ -496,7 +549,6 @@
       font-size: 13px;
       line-height: 1.5;
     }
-
     .provider-hint {
       font-size: 12px;
       color: #6b7280;
@@ -855,12 +907,32 @@
 </head>
 <body>
   <div class="page">
+    <section class="auth-screen" id="authScreen">
+      <div class="auth-card">
+        <h2>网页登录</h2>
+        <p>请输入统一登录密码，验证通过后才可进入声音克隆工具。</p>
+        <div class="field">
+          <label for="loginPassword">登录密码</label>
+          <input id="loginPassword" type="password" placeholder="请输入密码" />
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btnLogin" onclick="login()">登录</button>
+        </div>
+        <div class="auth-error" id="authError"></div>
+        <div class="auth-loading" id="authLoading"></div>
+      </div>
+    </section>
+
+  <div class="app-shell hidden" id="appShell">
     <div class="topbar">
       <div>
         <h1>凉飕飕声音克隆工具</h1>
         <p class="subtitle">支持智谱、阿里云、火山引擎三家模型。新建音色时按当前所选模型走接口，历史音色继续使用时自动绑定原来源模型。阿里云和火山的生成链路已接入本地代理，请通过本地 Node 服务打开页面。</p>
       </div>
-      <button class="ghost-btn" onclick="openDrawer()">我的音色</button>
+      <div class="btn-row">
+        <button class="ghost-btn" onclick="openDrawer()">我的音色</button>
+        <button class="ghost-btn" onclick="logout()">退出登录</button>
+      </div>
     </div>
 
     <div class="glass-card">
@@ -1058,6 +1130,7 @@
       <div class="result-list" id="resultList"></div>
     </div>
   </div>
+  </div>
 
   <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
   <aside class="drawer" id="voiceDrawer">
@@ -1130,6 +1203,7 @@
     let resultIndex = 0;
     let currentVoiceSource = 'unknown';
     let isApiPanelOpen = false;
+    let isAuthenticated = false;
     const IS_LOCAL_DEBUG = ['localhost', '127.0.0.1'].indexOf(location.hostname) >= 0;
     const APP_CONFIG = window.APP_CONFIG || {};
 
@@ -1160,6 +1234,30 @@
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
+    }
+
+    function setAuthError(message) {
+      document.getElementById('authError').textContent = message || '';
+    }
+
+    function setAuthLoading(message) {
+      document.getElementById('authLoading').textContent = message || '';
+    }
+
+    function applyAuthUiState(authenticated) {
+      isAuthenticated = !!authenticated;
+      document.body.classList.toggle('auth-locked', !isAuthenticated);
+      document.getElementById('authScreen').classList.toggle('show', !isAuthenticated);
+      document.getElementById('appShell').classList.toggle('hidden', !isAuthenticated);
+      if (!isAuthenticated) {
+        closeDrawer();
+        closeSaveModal();
+        document.getElementById('loginPassword').value = '';
+        setAuthLoading('');
+      } else {
+        setAuthError('');
+        setAuthLoading('');
+      }
     }
 
     function showStatus(id, type, message, loading) {
@@ -1215,6 +1313,73 @@
     function buildProxyUrl(path, configs) {
       const baseUrl = getProxyBaseUrl(configs);
       return baseUrl ? baseUrl + path : path;
+    }
+
+    function isLocalPageHost() {
+      return location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    }
+
+    function buildAuthUrl(path, configs) {
+      if (isLocalPageHost()) return path;
+      return buildProxyUrl(path, configs);
+    }
+
+    async function fetchAuth(path, options) {
+      const requestUrl = buildAuthUrl(path, loadApiConfigs());
+      return fetch(requestUrl, Object.assign({
+        credentials: 'include'
+      }, options || {}));
+    }
+
+    async function checkAuthStatus() {
+      try {
+        const res = await fetchAuth('/api/auth/status');
+        const json = await res.json();
+        applyAuthUiState(!!(res.ok && json && json.authenticated));
+      } catch (error) {
+        applyAuthUiState(false);
+        setAuthError('无法连接登录服务，请先确认 Node 服务已启动。');
+      }
+    }
+
+    async function login() {
+      const password = document.getElementById('loginPassword').value;
+      if (!password.trim()) {
+        setAuthError('请输入登录密码');
+        document.getElementById('loginPassword').focus();
+        return;
+      }
+
+      document.getElementById('btnLogin').disabled = true;
+      setAuthError('');
+      setAuthLoading('正在验证...');
+
+      try {
+        const res = await fetchAuth('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ password: password })
+        });
+        const json = await res.json();
+        if (!res.ok) {
+          throw new Error((json && json.error) || '登录失败');
+        }
+        applyAuthUiState(true);
+      } catch (error) {
+        applyAuthUiState(false);
+        setAuthError(error.message || '登录失败');
+      } finally {
+        document.getElementById('btnLogin').disabled = false;
+      }
+    }
+
+    async function logout() {
+      try {
+        await fetchAuth('/api/auth/logout', { method: 'POST' });
+      } catch (error) {}
+      applyAuthUiState(false);
     }
 
     function isProviderConfigured(provider, configs) {
@@ -1523,7 +1688,14 @@
     async function fetchWithLocalProxy(url, options, providerLabel) {
       const requestUrl = buildProxyUrl(url, getApiConfigsFromInputs());
       try {
-        return await fetch(requestUrl, options);
+        const response = await fetch(requestUrl, Object.assign({
+          credentials: 'include'
+        }, options || {}));
+        if (response.status === 401) {
+          applyAuthUiState(false);
+          setAuthError('登录已失效，请重新输入密码');
+        }
+        return response;
       } catch (error) {
         const isLikelyProxyIssue =
           location.protocol === 'file:' ||
@@ -1924,6 +2096,13 @@
       if (event.target === this) closeSaveModal();
     });
 
+    document.getElementById('loginPassword').addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        login();
+      }
+    });
+
     async function generateSpeech() {
       if (!currentVoice) {
         showStatus('status3', 'error', '⚠️ 请先创建或选择一个音色。', false);
@@ -2123,7 +2302,8 @@
         });
     }
 
-    (function init() {
+    (async function init() {
+      document.body.classList.add('auth-locked');
       migrateLegacyData();
       const configs = loadApiConfigs();
       applyApiConfigsToInputs(configs);
@@ -2139,6 +2319,10 @@
       renderDrawer();
       updateCharCount();
       document.getElementById('cloneHint').textContent = PROVIDERS[selectedProvider].cloneHint;
+      await checkAuthStatus();
+      if (!isAuthenticated) {
+        document.getElementById('loginPassword').focus();
+      }
     })();
   </script>
 </body>
