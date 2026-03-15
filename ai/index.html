@@ -56,9 +56,57 @@
       align-items: center;
       justify-content: center;
       padding: 24px 0;
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
     }
     .auth-screen.show {
       display: flex;
+    }
+    .auth-screen::before,
+    .auth-screen::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(1400px, 125vw);
+      background-repeat: no-repeat;
+      background-position: center bottom;
+      background-size: 100% auto;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .auth-screen::before {
+      bottom: -30px;
+      height: 28vh;
+      min-height: 180px;
+      opacity: 0.18;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 440' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='mountainBack' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0%25' stop-color='%23dbeafe' stop-opacity='0.46'/%3E%3Cstop offset='100%25' stop-color='%230f766e' stop-opacity='0.08'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23mountainBack)' d='M0 332C66 316 115 267 175 243c60-24 128-19 187-53 51-29 88-87 150-99 86-17 126 61 201 76 90 17 146-73 236-67 72 4 122 68 192 86 76 20 145-22 220-23 72-1 114 42 172 80 30 20 46 26 67 32V440H0Z'/%3E%3C/svg%3E");
+      filter: blur(5px);
+    }
+    .auth-screen::after {
+      bottom: -52px;
+      height: 22vh;
+      min-height: 150px;
+      opacity: 0.22;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 360' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='mountainFront' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0%25' stop-color='%2393c5fd' stop-opacity='0.34'/%3E%3Cstop offset='100%25' stop-color='%231e3a8a' stop-opacity='0.16'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23mountainFront)' d='M0 277c80-10 133-83 210-105 78-22 146 15 226-26 77-39 117-138 208-143 102-7 148 102 243 116 94 14 165-78 257-72 89 5 145 87 227 118 79 30 147 13 229 32V360H0Z'/%3E%3C/svg%3E");
+      filter: blur(3px);
+    }
+    .auth-card::before {
+      content: "";
+      position: absolute;
+      left: -6%;
+      right: -6%;
+      top: -52px;
+      height: 150px;
+      pointer-events: none;
+      z-index: -1;
+      background:
+        radial-gradient(ellipse at 20% 70%, rgba(255,255,255,0.16), transparent 58%),
+        radial-gradient(ellipse at 50% 62%, rgba(219,234,254,0.16), transparent 52%),
+        radial-gradient(ellipse at 80% 68%, rgba(255,255,255,0.13), transparent 56%);
+      filter: blur(18px);
+      opacity: 0.72;
     }
     .auth-card {
       width: 100%;
@@ -76,6 +124,8 @@
         inset 0 -18px 30px rgba(255,255,255,0.03),
         0 22px 60px rgba(15,23,42,0.10);
       text-align: center;
+      position: relative;
+      z-index: 1;
     }
     .auth-rabbit-wrap {
       display: flex;
