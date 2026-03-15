@@ -7,5 +7,5 @@ window.APP_CONFIG = {
 
   // 如果线上代理已经在服务器环境变量中配置了阿里云 / 火山密钥，
   // 可改为 true，这样前端可不再要求用户手动输入这些密钥。
-  useServerManagedSecrets: false
+  useServerManagedSecrets: true
 };
