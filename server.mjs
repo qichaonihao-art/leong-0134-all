@@ -83,7 +83,7 @@ function readRequestBody(req) {
     let body = '';
     req.on('data', (chunk) => {
       body += chunk;
-      if (body.length > 2 * 1024 * 1024) {
+      if (body.length > 20 * 1024 * 1024) {
         reject(new Error('请求体过大'));
         req.destroy();
       }
@@ -671,9 +671,37 @@ async function handleVolcVoiceClone(req, res) {
     const resolvedAppKey = readValue(SERVER_CONFIG.volcAppKey);
     const resolvedAccessKey = readValue(SERVER_CONFIG.volcAccessKey);
     const resolvedSpeakerId = readValue(speakerId, SERVER_CONFIG.volcSpeakerId);
+    const debugFlags = {
+      hasEnvAppKey: !!resolvedAppKey,
+      hasEnvAccessKey: !!resolvedAccessKey,
+      hasEnvSpeakerId: !!readValue(SERVER_CONFIG.volcSpeakerId),
+      hasBodySpeakerId: !!readValue(speakerId),
+      hasBodyAudioData: typeof audioData === 'string' && audioData.length > 0,
+      hasBodyResourceId: typeof resourceId === 'string' && resourceId.length > 0,
+      hasBodyAudioFormat: typeof audioFormat === 'string' && audioFormat.length > 0,
+      contentType: req.headers['content-type'] || '',
+      bodyKeys: body && typeof body === 'object' ? Object.keys(body) : []
+    };
 
-    if (!resolvedAppKey || !resolvedAccessKey || !resolvedSpeakerId || !audioData) {
-      sendJson(res, 400, { error: '缺少火山引擎服务端环境变量或必要业务参数（speakerId / audioData）' });
+    console.error('[volc voice clone] incoming request summary', debugFlags);
+
+    if (!debugFlags.hasEnvAppKey) {
+      sendJson(res, 400, { error: '缺少服务端环境变量 VOLCENGINE_APP_KEY', debug: debugFlags });
+      return;
+    }
+
+    if (!debugFlags.hasEnvAccessKey) {
+      sendJson(res, 400, { error: '缺少服务端环境变量 VOLCENGINE_ACCESS_KEY', debug: debugFlags });
+      return;
+    }
+
+    if (!resolvedSpeakerId) {
+      sendJson(res, 400, { error: '缺少 speakerId：前端 body.speakerId 与服务端 VOLCENGINE_SPEAKER_ID 都未提供', debug: debugFlags });
+      return;
+    }
+
+    if (!debugFlags.hasBodyAudioData) {
+      sendJson(res, 400, { error: '缺少 body.audioData，或音频数据为空', debug: debugFlags });
       return;
     }
 
@@ -729,12 +757,16 @@ async function handleVolcVoiceClone(req, res) {
       message: error.message,
       stack: error.stack
     });
+    const isBodyParseOrSizeError =
+      error.message === '请求体不是合法 JSON' ||
+      error.message === '请求体过大';
     sendJson(res, 500, {
-      error: error.message || '火山引擎训练请求失败',
+      error: isBodyParseOrSizeError ? error.message : (error.message || '火山引擎训练请求失败'),
       debug: {
         upstreamUrl,
         fetchMessage: error.message || '',
-        fetchStack: error.stack || ''
+        fetchStack: error.stack || '',
+        contentType: req.headers['content-type'] || ''
       }
     });
   }
