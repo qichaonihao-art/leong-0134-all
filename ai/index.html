@@ -323,6 +323,8 @@
       -webkit-backdrop-filter: blur(22px);
       position: relative;
       overflow: hidden;
+      isolation: isolate;
+      background-clip: padding-box;
     }
     .topbar::before {
       content: "";
@@ -334,6 +336,19 @@
         linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
       opacity: 0.9;
       pointer-events: none;
+    }
+    .topbar::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.14),
+        inset 0 -1px 0 rgba(255,255,255,0.06),
+        inset 0 0 0 1px rgba(168,201,255,0.06);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.05), transparent 22%, transparent 76%, rgba(255,255,255,0.03));
     }
     .hero-copy,
     .hero-actions {
@@ -441,6 +456,24 @@
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,0.08),
         0 18px 48px rgba(2,8,23,0.22);
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      background-clip: padding-box;
+    }
+    .glass-card::before,
+    .model-panel-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.11),
+        inset 0 -1px 0 rgba(255,255,255,0.05),
+        inset 0 0 0 1px rgba(168,201,255,0.05);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.045), transparent 24%, transparent 80%, rgba(255,255,255,0.025));
     }
     .api-card-head {
       display: flex;
@@ -640,6 +673,23 @@
         0 20px 44px rgba(2,8,23,0.22);
       margin-bottom: 16px;
       transition: box-shadow 0.22s, border-color 0.22s, opacity 0.22s, transform 0.22s;
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      background-clip: padding-box;
+    }
+    .step-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.1),
+        inset 0 -1px 0 rgba(255,255,255,0.04),
+        inset 0 0 0 1px rgba(168,201,255,0.05);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.055), transparent 23%, transparent 82%, rgba(255,255,255,0.02));
     }
     .step-card.active {
       border-color: rgba(119,176,255,0.3);
@@ -1327,7 +1377,7 @@
       <div class="hero-copy">
         <div class="hero-kicker">Voice Clone Workspace</div>
         <h1>凉飕飕声音克隆工具</h1>
-        <p class="subtitle">面向内部同事的声音克隆工作台，保留现有上传、克隆、保存与生成闭环，同时把视觉层统一成更克制、更现代的 AI 工具面板。</p>
+        <p class="subtitle">面向内部同事的声音克隆工作台，智谱、火山、阿里云随意切换</p>
         <div class="hero-metrics">
           <span class="hero-metric"><strong>3 家模型</strong> 灵活切换</span>
           <span class="hero-metric"><strong>本地保存</strong> 个人音色与配置</span>
