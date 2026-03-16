@@ -587,9 +587,16 @@
       background-clip: padding-box;
     }
     .summary-card {
-      padding: 12px 16px 13px;
+      padding: 10px 16px 11px;
       border-radius: 22px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
+    }
+    .summary-head-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      flex: 1;
     }
     .glass-card::before,
     .model-panel-card::before {
@@ -614,8 +621,10 @@
       margin-bottom: 10px;
     }
     .summary-card .api-card-head {
+      align-items: center;
       gap: 10px;
-      margin-bottom: 6px;
+      margin-bottom: 0;
+      flex-wrap: nowrap;
     }
     .glass-card-title {
       font-size: 15px;
@@ -635,6 +644,7 @@
     }
     .summary-card .api-summary {
       gap: 6px;
+      min-width: 0;
     }
     .api-status-chip {
       display: inline-flex;
@@ -694,9 +704,11 @@
       margin-bottom: 12px;
     }
     .summary-card .api-toggle-row {
-      justify-content: flex-end;
-      gap: 8px;
-      margin-bottom: 2px;
+      display: none;
+    }
+    .summary-card .ghost-btn.ghost-light {
+      margin-left: 12px;
+      align-self: center;
     }
     .api-panel-note {
       font-size: 12px;
@@ -877,6 +889,7 @@
     .summary-card .step-header {
       gap: 8px;
       margin-bottom: 0;
+      flex: 0 0 auto;
     }
     .step-num {
       width: 30px;
@@ -1572,12 +1585,14 @@
 
     <div class="glass-card summary-card">
       <div class="api-card-head">
-        <div class="glass-card-title">API 配置</div>
-        <div class="api-summary" id="apiSummary"></div>
+        <div class="summary-head-main">
+          <div class="glass-card-title">API 配置</div>
+          <div class="api-summary" id="apiSummary"></div>
+        </div>
+        <button class="ghost-btn ghost-light" id="apiToggleBtn" onclick="toggleApiPanel()">展开配置</button>
       </div>
       <div class="api-toggle-row">
         <div class="api-panel-note" id="apiPanelNote"></div>
-        <button class="ghost-btn ghost-light" id="apiToggleBtn" onclick="toggleApiPanel()">展开配置</button>
       </div>
       <div class="api-panel-body" id="apiPanelBody">
       <div class="glass-grid">
@@ -1686,15 +1701,17 @@
 
     <div class="step-card active model-panel-card summary-card" id="card0">
       <div class="api-card-head">
-        <div class="step-header">
-          <div class="step-num">🚩</div>
-          <div class="step-title">选择模型</div>
+        <div class="summary-head-main">
+          <div class="step-header">
+            <div class="step-num">🚩</div>
+            <div class="step-title">选择模型</div>
+          </div>
+          <div class="api-summary" id="providerSelectionSummary"></div>
         </div>
-        <div class="api-summary" id="providerSelectionSummary"></div>
+        <button class="ghost-btn ghost-light" id="providerToggleBtn" onclick="toggleProviderPanel()"></button>
       </div>
       <div class="api-toggle-row">
         <div class="api-panel-note" id="providerPanelNote"></div>
-        <button class="ghost-btn ghost-light" id="providerToggleBtn" onclick="toggleProviderPanel()"></button>
       </div>
       <div class="api-panel-body" id="providerPanelBody">
         <div class="provider-selector" id="providerSelector"></div>
