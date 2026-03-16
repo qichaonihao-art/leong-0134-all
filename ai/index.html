@@ -1729,7 +1729,7 @@
       <div class="provider-hint" id="cloneHint"></div>
       <div class="status-bar hidden" id="status2"></div>
       <div class="btn-row">
-        <button class="btn btn-primary" id="btnClone" onclick="cloneVoice()" disabled>开始处理音色</button>
+        <button class="btn btn-primary" id="btnClone" onclick="cloneVoice()" disabled>开始处理</button>
       </div>
     </div>
 
@@ -1739,10 +1739,6 @@
         <div class="step-title">输入新文本</div>
       </div>
       <div class="text-area-block">
-        <div class="text-area-head">
-          <div class="text-area-title">输入要生成的语音内容</div>
-          <div class="text-area-tip">支持长文本，输入越多文本框会越往下展开。</div>
-        </div>
         <textarea id="inputText" placeholder="例如：远上寒山石径斜，白云生处有人家。停车坐爱枫林晚，霜叶红于二月花。" oninput="updateCharCount()"></textarea>
       </div>
       <div class="char-count"><span id="charCount">0</span> 字</div>
