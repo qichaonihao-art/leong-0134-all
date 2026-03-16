@@ -1811,21 +1811,21 @@
         label: '智谱',
         short: '智谱',
         badgeClass: 'zhipu',
-        description: '当前最完整，继续保留上传样本 -> 克隆 -> 生成语音闭环。',
+        description: '',
         cloneHint: ''
       },
       aliyun: {
         label: '阿里云',
         short: '阿里云',
         badgeClass: 'aliyun',
-        description: '会基于样本音频创建阿里云专属音色，并把目标模型一起绑定保存。',
+        description: '',
         cloneHint: '阿里云会先按 `qwen-voice-enrollment` 创建专属 voice，再通过统一代理完成后续创建与语音生成。'
       },
       volcengine: {
         label: '火山引擎',
         short: '火山',
         badgeClass: 'volcengine',
-        description: '训练接口需要 `speaker_id`，历史音色会明确绑定火山来源。',
+        description: '',
         cloneHint: '火山引擎会用当前 `speaker_id` 发起训练，并统一通过代理完成训练与字符版语音生成；历史音色会保留自己的资源版本。'
       }
     };
@@ -2391,10 +2391,7 @@
           '当前模型：' + provider.label +
         '</span>';
       document.getElementById('providerPanelNote').textContent = '';
-      document.getElementById('providerSummary').innerHTML =
-        '当前用于 <strong>新建音色</strong> 的模型：' +
-        providerBadgeHtml(selectedProvider) +
-        '。若你稍后从右侧“我的音色”里选择历史音色，系统会自动改用它自己的来源模型。';
+      document.getElementById('providerSummary').innerHTML = '';
       document.getElementById('cloneHint').textContent = PROVIDERS[selectedProvider].cloneHint;
     }
 
