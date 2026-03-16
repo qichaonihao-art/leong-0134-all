@@ -1285,9 +1285,6 @@
         <audio id="originalAudio" controls></audio>
       </div>
       <div class="status-bar hidden" id="status1"></div>
-      <div class="btn-row">
-        <button class="btn btn-primary" id="btnUpload" onclick="prepareForClone()" disabled>确认样本并继续</button>
-      </div>
     </div>
 
     <div class="step-card disabled" id="card2">
@@ -1415,6 +1412,15 @@
     let isApiPanelOpen = false;
     let isProviderPanelOpen = true;
     let isAuthenticated = false;
+    let serverConfigStatus = {
+      loaded: false,
+      reachable: false,
+      passwordConfigured: false,
+      aliyunApiKey: false,
+      volcAppKey: false,
+      volcAccessKey: false,
+      volcSpeakerId: false
+    };
     const IS_LOCAL_DEBUG = ['localhost', '127.0.0.1'].indexOf(location.hostname) >= 0;
     const APP_CONFIG = window.APP_CONFIG || {};
 
@@ -1581,6 +1587,57 @@
       }, options || {}));
     }
 
+    async function fetchServerConfigStatus() {
+      const requestUrl = buildAuthUrl('/api/config/status', loadApiConfigs());
+      try {
+        const res = await fetch(requestUrl, { credentials: 'include' });
+        const json = await res.json();
+        if (!res.ok) throw new Error((json && json.error) || '读取服务端配置失败');
+        serverConfigStatus = {
+          loaded: true,
+          reachable: true,
+          passwordConfigured: !!(json && json.auth && json.auth.passwordConfigured),
+          aliyunApiKey: !!(json && json.serverManaged && json.serverManaged.aliyunApiKey),
+          volcAppKey: !!(json && json.serverManaged && json.serverManaged.volcAppKey),
+          volcAccessKey: !!(json && json.serverManaged && json.serverManaged.volcAccessKey),
+          volcSpeakerId: !!(json && json.serverManaged && json.serverManaged.volcSpeakerId)
+        };
+      } catch (error) {
+        serverConfigStatus = {
+          loaded: true,
+          reachable: false,
+          passwordConfigured: false,
+          aliyunApiKey: false,
+          volcAppKey: false,
+          volcAccessKey: false,
+          volcSpeakerId: false
+        };
+      }
+    }
+
+    function canUseAliyunServerKey(configs) {
+      return !!APP_CONFIG.useServerManagedSecrets && !!serverConfigStatus.aliyunApiKey;
+    }
+
+    function hasAliyunCredentials(configs) {
+      const all = configs || loadApiConfigs();
+      return !!(all.aliyun && all.aliyun.apiKey) || canUseAliyunServerKey(all);
+    }
+
+    function canUseVolcServerKeys(configs) {
+      return !!APP_CONFIG.useServerManagedSecrets && !!serverConfigStatus.volcAppKey && !!serverConfigStatus.volcAccessKey;
+    }
+
+    function hasVolcCredentials(configs) {
+      const all = configs || loadApiConfigs();
+      return !!(all.volcengine && all.volcengine.appKey && all.volcengine.accessKey) || canUseVolcServerKeys(all);
+    }
+
+    function hasVolcSpeaker(configs) {
+      const all = configs || loadApiConfigs();
+      return !!(all.volcengine && all.volcengine.speakerId) || !!serverConfigStatus.volcSpeakerId;
+    }
+
     async function checkAuthStatus() {
       try {
         const res = await fetchAuth('/api/auth/status');
@@ -1635,10 +1692,8 @@
       const all = configs || loadApiConfigs();
       if (provider === 'proxy') return !!getProxyBaseUrl(all) || IS_LOCAL_DEBUG;
       if (provider === 'zhipu') return !!(all.zhipu && all.zhipu.apiKey);
-      if (provider === 'aliyun') {
-        return !!(all.aliyun && all.aliyun.apiKey) || !!APP_CONFIG.useServerManagedSecrets;
-      }
-      return !!(all.volcengine && all.volcengine.appKey && all.volcengine.accessKey && all.volcengine.speakerId) || !!APP_CONFIG.useServerManagedSecrets;
+      if (provider === 'aliyun') return hasAliyunCredentials(all);
+      return hasVolcCredentials(all) && hasVolcSpeaker(all);
     }
 
     function updateApiSummary(configs) {
@@ -1663,6 +1718,23 @@
         el.textContent = ready ? '已配置' : '未配置';
         el.className = 'provider-state' + (ready ? ' ready' : '');
       });
+
+      if (!serverConfigStatus.reachable) {
+        document.getElementById('apiPanelNote').textContent = '当前还连不上代理服务，登录、阿里云和火山能力都无法校验；本地调试时请先启动 Node 服务。';
+        return;
+      }
+
+      if (APP_CONFIG.useServerManagedSecrets) {
+        const managed = [];
+        if (serverConfigStatus.aliyunApiKey) managed.push('阿里云');
+        if (serverConfigStatus.volcAppKey && serverConfigStatus.volcAccessKey) managed.push('火山引擎');
+        document.getElementById('apiPanelNote').textContent = states.some(function(item) {
+          return !isProviderConfigured(item.key, all);
+        })
+          ? '还有配置未完成，展开后可继续补齐或清除。'
+          : (managed.length ? '当前部署已托管 ' + managed.join('、') + ' 密钥，默认收起即可；需要调整时再展开。' : '页面允许服务端代管密钥，但当前代理里还没配好相关环境变量。');
+        return;
+      }
 
       document.getElementById('apiPanelNote').textContent = states.some(function(item) {
         return !isProviderConfigured(item.key, all);
@@ -2097,7 +2169,6 @@
       currentUploadedFileId = null;
       resetCurrentVoiceSelection();
       hideStatus('status1');
-      document.getElementById('btnUpload').disabled = true;
       if (!currentFile) return;
 
       const url = URL.createObjectURL(currentFile);
@@ -2116,7 +2187,9 @@
         document.getElementById('uploadArea').classList.add('has-file');
         document.getElementById('uploadText').textContent = '✓ ' + currentFile.name + '（' + currentFileDuration.toFixed(1) + ' 秒）';
         showStatus('status1', 'success', '✓ 样本时长符合要求，可以继续处理音色。', false);
-        document.getElementById('btnUpload').disabled = false;
+        document.getElementById('num1').textContent = '✓';
+        setCardState('card1', 'done');
+        setCardState('card2', 'active');
         syncCloneAvailability();
       } catch (e) {
         showStatus('status1', 'error', '⚠️ 无法读取音频时长，请换一个文件再试。', false);
@@ -2131,18 +2204,6 @@
         audio.onerror = reject;
         audio.src = URL.createObjectURL(file);
       });
-    }
-
-    function prepareForClone() {
-      if (!currentFile) {
-        showStatus('status1', 'error', '⚠️ 请先选择音频文件。', false);
-        return;
-      }
-      document.getElementById('num1').textContent = '✓';
-      setCardState('card1', 'done');
-      setCardState('card2', 'active');
-      document.getElementById('btnClone').disabled = false;
-      document.getElementById('card2').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     async function cloneVoice() {
@@ -2231,7 +2292,7 @@
 
     async function cloneWithAliyun(file) {
       const configs = getApiConfigsFromInputs();
-      if (!configs.aliyun.apiKey && !APP_CONFIG.useServerManagedSecrets) throw new Error('请先填写阿里云 API Key。');
+      if (!hasAliyunCredentials(configs)) throw new Error('请先填写阿里云 API Key，或在代理服务中配置 ALIYUN_API_KEY。');
       const dataUri = await fileToDataUri(file);
 
       const res = await fetchWithLocalProxy('/api/voice/aliyun', {
@@ -2266,8 +2327,8 @@
 
     async function cloneWithVolcengine(file) {
       const configs = getApiConfigsFromInputs();
-      if ((!configs.volcengine.appKey || !configs.volcengine.accessKey || !configs.volcengine.speakerId) && !APP_CONFIG.useServerManagedSecrets) {
-        throw new Error('请先补全火山引擎 App Key、Access Key 和 Speaker ID。');
+      if (!hasVolcCredentials(configs) || !hasVolcSpeaker(configs)) {
+        throw new Error('请先补全火山引擎 App Key、Access Key、Speaker ID，或在代理服务中配置对应环境变量。');
       }
 
       const audioData = await fileToBase64(file);
@@ -2480,7 +2541,7 @@
 
     async function generateWithAliyun(voice, text) {
       const configs = getApiConfigsFromInputs();
-      if (!configs.aliyun.apiKey && !APP_CONFIG.useServerManagedSecrets) throw new Error('请先填写阿里云 API Key。');
+      if (!hasAliyunCredentials(configs)) throw new Error('请先填写阿里云 API Key，或在代理服务中配置 ALIYUN_API_KEY。');
 
       const res = await fetchWithLocalProxy('/api/tts/aliyun', {
         method: 'POST',
@@ -2510,8 +2571,8 @@
 
     async function generateWithVolcengine(voice, text) {
       const configs = getApiConfigsFromInputs();
-      if ((!configs.volcengine.appKey || !configs.volcengine.accessKey) && !APP_CONFIG.useServerManagedSecrets) {
-        throw new Error('请先填写火山引擎 App Key 和 Access Key。');
+      if (!hasVolcCredentials(configs)) {
+        throw new Error('请先填写火山引擎 App Key 和 Access Key，或在代理服务中配置对应环境变量。');
       }
 
       const res = await fetchWithLocalProxy('/api/tts/volcengine', {
@@ -2601,6 +2662,7 @@
     (async function init() {
       document.body.classList.add('auth-locked');
       migrateLegacyData();
+      await fetchServerConfigStatus();
       const configs = loadApiConfigs();
       applyApiConfigsToInputs(configs);
       bindAutoSave();

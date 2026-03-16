@@ -154,6 +154,21 @@ function handleAuthStatus(req, res) {
   sendJson(res, 200, { ok: true, authenticated: isAuthenticated(req) });
 }
 
+function handleConfigStatus(req, res) {
+  sendJson(res, 200, {
+    ok: true,
+    auth: {
+      passwordConfigured: !!APP_LOGIN_PASSWORD
+    },
+    serverManaged: {
+      aliyunApiKey: !!readValue(SERVER_CONFIG.aliyunApiKey),
+      volcAppKey: !!readValue(SERVER_CONFIG.volcAppKey),
+      volcAccessKey: !!readValue(SERVER_CONFIG.volcAccessKey),
+      volcSpeakerId: !!readValue(SERVER_CONFIG.volcSpeakerId)
+    }
+  });
+}
+
 function handleAuthLogout(req, res) {
   const token = getAuthTokenFromRequest(req);
   if (token) authSessions.delete(token);
@@ -920,6 +935,11 @@ const server = createServer(async (req, res) => {
 
   if (req.method === 'POST' && url.pathname === '/api/auth/logout') {
     handleAuthLogout(req, res);
+    return;
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/config/status') {
+    handleConfigStatus(req, res);
     return;
   }
 
