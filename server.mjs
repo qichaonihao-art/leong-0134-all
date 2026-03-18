@@ -17,6 +17,7 @@ const authSessions = new Map();
 
 const SERVER_CONFIG = {
   aliyunApiKey: process.env.ALIYUN_API_KEY || '',
+  arkApiKey: process.env.ARK_API_KEY || '',
   volcAppKey: process.env.VOLCENGINE_APP_KEY || '',
   volcAccessKey: process.env.VOLCENGINE_ACCESS_KEY || '',
   volcSpeakerId: process.env.VOLCENGINE_SPEAKER_ID || ''
@@ -181,6 +182,61 @@ function readValue(...candidates) {
     if (typeof value === 'string' && value.trim()) return value.trim();
   }
   return '';
+}
+
+function normalizeBase64ImageInput(image, imageMimeType) {
+  const raw = readValue(image);
+  if (!raw) {
+    throw new Error('缺少图片数据 image');
+  }
+
+  const dataUrlMatch = raw.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,([A-Za-z0-9+/=\s]+)$/);
+  if (dataUrlMatch) {
+    return {
+      mimeType: dataUrlMatch[1],
+      base64Data: dataUrlMatch[2].replace(/\s+/g, ''),
+      imageUrl: `data:${dataUrlMatch[1]};base64,${dataUrlMatch[2].replace(/\s+/g, '')}`
+    };
+  }
+
+  const mimeType = readValue(imageMimeType) || 'image/png';
+  const normalized = raw.replace(/\s+/g, '');
+  if (!/^[A-Za-z0-9+/=]+$/.test(normalized)) {
+    throw new Error('图片 base64 格式不合法');
+  }
+
+  return {
+    mimeType,
+    base64Data: normalized,
+    imageUrl: `data:${mimeType};base64,${normalized}`
+  };
+}
+
+function extractResponsesText(json) {
+  if (!json || typeof json !== 'object') return '';
+  if (typeof json.output_text === 'string' && json.output_text.trim()) return json.output_text.trim();
+
+  const output = Array.isArray(json.output) ? json.output : [];
+  const textParts = [];
+
+  for (const item of output) {
+    if (!item || typeof item !== 'object') continue;
+
+    if (Array.isArray(item.content)) {
+      for (const contentItem of item.content) {
+        if (!contentItem || typeof contentItem !== 'object') continue;
+        if (typeof contentItem.text === 'string' && contentItem.text.trim()) {
+          textParts.push(contentItem.text.trim());
+        }
+      }
+    }
+
+    if (typeof item.text === 'string' && item.text.trim()) {
+      textParts.push(item.text.trim());
+    }
+  }
+
+  return textParts.join('\n').trim();
 }
 
 function normalizeAliyunPreferredName(value) {
@@ -889,6 +945,91 @@ async function handleVolcVoiceClone(req, res) {
   }
 }
 
+async function handleDoubaoMultimodal(req, res) {
+  const upstreamUrl = 'https://ark.cn-beijing.volces.com/api/v3/responses';
+
+  try {
+    const body = await readRequestBody(req);
+    const { model, image, imageMimeType, question } = body;
+    const resolvedApiKey = readValue(SERVER_CONFIG.arkApiKey);
+    const resolvedQuestion = readValue(question);
+    const resolvedModel = readValue(model) || 'doubao-1-5-vision-pro-250328';
+
+    if (!resolvedApiKey) {
+      sendJson(res, 500, { error: '服务端未配置 ARK_API_KEY' });
+      return;
+    }
+
+    if (!resolvedQuestion) {
+      sendJson(res, 400, { error: '缺少文本问题 question' });
+      return;
+    }
+
+    let normalizedImage;
+    try {
+      normalizedImage = normalizeBase64ImageInput(image, imageMimeType);
+    } catch (error) {
+      sendJson(res, 400, { error: error.message || '图片数据不合法' });
+      return;
+    }
+
+    const upstreamRes = await fetch(upstreamUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${resolvedApiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: resolvedModel,
+        input: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'input_text',
+                text: resolvedQuestion
+              },
+              {
+                type: 'input_image',
+                image_url: normalizedImage.imageUrl
+              }
+            ]
+          }
+        ]
+      })
+    });
+
+    const responseText = await upstreamRes.text();
+    let json = null;
+    try {
+      json = responseText ? JSON.parse(responseText) : null;
+    } catch {}
+
+    if (!upstreamRes.ok) {
+      sendJson(res, upstreamRes.status, {
+        error: json?.error?.message || json?.message || json?.code || `方舟 Responses API 请求失败，上游状态码 ${upstreamRes.status}`,
+        upstream: json || responseText
+      });
+      return;
+    }
+
+    sendJson(res, 200, {
+      ok: true,
+      model: resolvedModel,
+      answer: extractResponsesText(json),
+      response: json
+    });
+  } catch (error) {
+    const isBodyParseOrSizeError =
+      error.message === '请求体不是合法 JSON' ||
+      error.message === '请求体过大';
+
+    sendJson(res, isBodyParseOrSizeError ? 400 : 500, {
+      error: isBodyParseOrSizeError ? error.message : (error.message || '豆包多模态理解失败')
+    });
+  }
+}
+
 async function serveStatic(req, res, pathname) {
   let targetPath = pathname === '/' ? '/index.html' : pathname;
   const filePath = path.normalize(path.join(AI_DIR, targetPath));
@@ -965,6 +1106,11 @@ const server = createServer(async (req, res) => {
 
   if (req.method === 'POST' && url.pathname === '/api/voice/volcengine') {
     await handleVolcVoiceClone(req, res);
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/doubao/multimodal') {
+    await handleDoubaoMultimodal(req, res);
     return;
   }
 
