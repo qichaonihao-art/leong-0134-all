@@ -214,29 +214,394 @@ function normalizeBase64ImageInput(image, imageMimeType) {
 
 function extractResponsesText(json) {
   if (!json || typeof json !== 'object') return '';
-  if (typeof json.output_text === 'string' && json.output_text.trim()) return json.output_text.trim();
+  if (typeof json.output_text === 'string' && json.output_text.trim()) {
+    return normalizeDoubaoDisplayText(json.output_text);
+  }
 
   const output = Array.isArray(json.output) ? json.output : [];
   const textParts = [];
 
   for (const item of output) {
     if (!item || typeof item !== 'object') continue;
+    if (isDoubaoReasoningType(item.type)) continue;
 
     if (Array.isArray(item.content)) {
       for (const contentItem of item.content) {
         if (!contentItem || typeof contentItem !== 'object') continue;
+        if (isDoubaoReasoningType(contentItem.type)) continue;
         if (typeof contentItem.text === 'string' && contentItem.text.trim()) {
           textParts.push(contentItem.text.trim());
         }
       }
     }
 
-    if (typeof item.text === 'string' && item.text.trim()) {
+    if (!isDoubaoReasoningType(item.type) && typeof item.text === 'string' && item.text.trim()) {
       textParts.push(item.text.trim());
     }
   }
 
-  return textParts.join('\n').trim();
+  return normalizeDoubaoDisplayText(textParts.join('\n').trim());
+}
+
+function isDoubaoReasoningType(value) {
+  return /reason|think|analysis/i.test(String(value || ''));
+}
+
+function shouldUseDoubaoVisibleText(value) {
+  return !!readValue(value);
+}
+
+function extractVisibleDoubaoText(payload) {
+  if (!payload || typeof payload !== 'object') return '';
+  if (shouldUseDoubaoVisibleText(payload.answer)) return normalizeDoubaoDisplayText(String(payload.answer));
+  if (shouldUseDoubaoVisibleText(payload.output_text)) return normalizeDoubaoDisplayText(String(payload.output_text));
+
+  const containers = [payload, payload.response, payload.item].filter(Boolean);
+  const textParts = [];
+
+  for (const item of containers) {
+    if (!item || typeof item !== 'object') continue;
+    if (isDoubaoReasoningType(item.type)) continue;
+
+    if (typeof item.text === 'string' && item.text.trim()) {
+      textParts.push(item.text.trim());
+    }
+
+    if (Array.isArray(item.content)) {
+      for (const contentItem of item.content) {
+        if (!contentItem || typeof contentItem !== 'object') continue;
+        if (isDoubaoReasoningType(contentItem.type)) continue;
+        if (typeof contentItem.text === 'string' && contentItem.text.trim()) {
+          textParts.push(contentItem.text.trim());
+        }
+      }
+    }
+  }
+
+  return normalizeDoubaoDisplayText(textParts.join('\n').trim());
+}
+
+function normalizeDoubaoCompareText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[#*_`>\-\s]/g, '')
+    .replace(/[，。、“”‘’；：:,.!?！？（）()【】\[\]《》<>]/g, '');
+}
+
+function normalizeDoubaoDisplayText(value) {
+  const raw = String(value || '').replace(/\r\n/g, '\n').trim();
+  if (!raw) return '';
+
+  const lines = raw.split('\n').map((line) => line.trim());
+  const dedupedLines = [];
+
+  for (const line of lines) {
+    if (!line && dedupedLines[dedupedLines.length - 1] === '') continue;
+    if (line && dedupedLines[dedupedLines.length - 1] === line) continue;
+    dedupedLines.push(line);
+  }
+
+  const filteredLines = [];
+  for (let i = 0; i < dedupedLines.length; i += 1) {
+    const current = dedupedLines[i];
+    if (!current) {
+      filteredLines.push(current);
+      continue;
+    }
+
+    const currentNormalized = normalizeDoubaoCompareText(current);
+    let duplicatedByFollowingBlock = false;
+
+    for (let span = 2; span <= 6; span += 1) {
+      const nextLines = dedupedLines
+        .slice(i + 1, i + 1 + span)
+        .filter(Boolean);
+      if (nextLines.length < span) continue;
+      const merged = normalizeDoubaoCompareText(nextLines.join(''));
+      if (merged && merged === currentNormalized) {
+        duplicatedByFollowingBlock = true;
+        break;
+      }
+    }
+
+    if (!duplicatedByFollowingBlock) {
+      filteredLines.push(current);
+    }
+  }
+
+  return filteredLines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+function extractVisibleDoubaoDelta(payload, eventName) {
+  const resolvedEvent = String(eventName || payload?.type || '').toLowerCase();
+  if (isDoubaoReasoningType(resolvedEvent)) return '';
+
+  const deltaCandidates = [
+    payload?.delta,
+    payload?.data?.delta,
+    payload?.item?.delta,
+    payload?.item,
+    payload?.data
+  ].filter(Boolean);
+
+  for (const item of deltaCandidates) {
+    if (typeof item === 'string' && item.trim() && !isDoubaoReasoningType(resolvedEvent)) {
+      return item;
+    }
+    if (!item || typeof item !== 'object') continue;
+    if (isDoubaoReasoningType(item.type)) continue;
+    if (typeof item.text === 'string' && item.text.trim()) return item.text;
+    if (typeof item.delta === 'string' && item.delta.trim()) return item.delta;
+    if (item.delta && typeof item.delta.text === 'string' && item.delta.text.trim()) return item.delta.text;
+    if (Array.isArray(item.content)) {
+      for (const contentItem of item.content) {
+        if (!contentItem || typeof contentItem !== 'object') continue;
+        if (isDoubaoReasoningType(contentItem.type)) continue;
+        if (typeof contentItem.text === 'string' && contentItem.text.trim()) {
+          return contentItem.text;
+        }
+      }
+    }
+  }
+
+  return '';
+}
+
+function getIncrementalText(baseText, incomingText) {
+  const base = String(baseText || '');
+  const incoming = String(incomingText || '');
+  if (!incoming) return '';
+  if (!base) return incoming;
+  if (incoming === base) return '';
+  if (incoming.startsWith(base)) return incoming.slice(base.length);
+
+  const maxOverlap = Math.min(base.length, incoming.length);
+  for (let overlap = maxOverlap; overlap > 0; overlap -= 1) {
+    if (base.slice(-overlap) === incoming.slice(0, overlap)) {
+      return incoming.slice(overlap);
+    }
+  }
+
+  return incoming;
+}
+
+function isDoubaoDeltaEvent(eventName) {
+  return /delta/i.test(String(eventName || ''));
+}
+
+function normalizeDoubaoHistory(history) {
+  if (!Array.isArray(history)) return [];
+
+  return history
+    .map((item) => ({
+      role: item && item.role === 'assistant' ? 'assistant' : 'user',
+      content: readValue(item && item.content)
+    }))
+    .filter((item) => item.content);
+}
+
+function buildDoubaoPromptWithHistory(question, history) {
+  const normalizedHistory = normalizeDoubaoHistory(history);
+  const responseInstruction = '请直接输出给用户可见的最终回答，不要展示思考过程、推理链路、分析草稿或中间步骤。';
+
+  if (!normalizedHistory.length) {
+    return [
+      responseInstruction,
+      '',
+      question
+    ].join('\n');
+  }
+
+  const transcript = normalizedHistory
+    .map((item) => (item.role === 'assistant' ? '助手：' : '用户：') + item.content)
+    .join('\n');
+
+  return [
+    responseInstruction,
+    '',
+    '以下是本轮会话的历史对话，请结合这些上下文继续回答。',
+    transcript,
+    '',
+    '当前问题：' + question
+  ].join('\n');
+}
+
+function wantsDoubaoStream(body, req) {
+  if (body && body.stream === true) return true;
+  const accept = String(req.headers.accept || '');
+  return accept.includes('text/event-stream');
+}
+
+function writeSseEvent(res, eventName, payload) {
+  if (eventName) {
+    res.write(`event: ${eventName}\n`);
+  }
+  res.write(`data: ${JSON.stringify(payload)}\n\n`);
+}
+
+function parseDoubaoSseBlock(rawBlock) {
+  const lines = String(rawBlock || '').split(/\r?\n/);
+  let eventName = '';
+  const dataLines = [];
+
+  for (const line of lines) {
+    if (line.startsWith('event:')) {
+      eventName = line.slice(6).trim();
+      continue;
+    }
+    if (line.startsWith('data:')) {
+      dataLines.push(line.slice(5).trimStart());
+    }
+  }
+
+  const rawData = dataLines.join('\n').trim();
+  if (!rawData) return null;
+  if (rawData === '[DONE]') {
+    return {
+      event: eventName || 'done',
+      done: true,
+      payload: null
+    };
+  }
+
+  let payload = null;
+  try {
+    payload = JSON.parse(rawData);
+  } catch {
+    return null;
+  }
+
+  return {
+    event: eventName || payload?.type || 'message',
+    done: payload?.type === 'response.completed' || payload?.type === 'response.done' || payload?.done === true,
+    payload
+  };
+}
+
+async function proxySseStreamToClient(upstreamRes, req, res) {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream; charset=utf-8',
+    'Cache-Control': 'no-cache, no-transform',
+    Connection: 'keep-alive',
+    'X-Accel-Buffering': 'no'
+  });
+  if (typeof res.flushHeaders === 'function') {
+    res.flushHeaders();
+  }
+  res.write(': connected\n\n');
+
+  if (!upstreamRes.body) {
+    writeSseEvent(res, 'error', { error: '上游未返回可读取的流' });
+    res.end();
+    return;
+  }
+
+  const reader = upstreamRes.body.getReader();
+  const decoder = new TextDecoder();
+  let closedByClient = false;
+  let buffer = '';
+  let accumulatedAnswer = '';
+  let finalTextCandidate = '';
+  let sentDone = false;
+
+  const abortStream = async () => {
+    if (closedByClient) return;
+    closedByClient = true;
+    try {
+      await reader.cancel();
+    } catch {}
+  };
+
+  req.once('close', abortStream);
+
+  try {
+    while (!closedByClient) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) {
+        buffer += decoder.decode(value, { stream: true });
+        const blocks = buffer.split(/\n\n/);
+        buffer = blocks.pop() || '';
+
+        for (const block of blocks) {
+          const parsed = parseDoubaoSseBlock(block);
+          if (!parsed) continue;
+
+          const payload = parsed.payload;
+          const errorMessage = payload?.error?.message || payload?.error || (payload?.type === 'error' ? (payload?.message || '流式响应失败') : '');
+          if (errorMessage) {
+            writeSseEvent(res, 'error', { error: errorMessage });
+            continue;
+          }
+
+          if (isDoubaoDeltaEvent(parsed.event)) {
+            const delta = extractVisibleDoubaoDelta(payload, parsed.event);
+            const incrementalDelta = getIncrementalText(accumulatedAnswer, delta);
+            if (incrementalDelta) {
+              accumulatedAnswer += incrementalDelta;
+              writeSseEvent(res, 'answer.delta', { delta: incrementalDelta });
+            }
+          }
+
+          const visibleText = extractVisibleDoubaoText(payload);
+          if (visibleText) {
+            finalTextCandidate = visibleText;
+          }
+
+          if (parsed.done && !sentDone) {
+            sentDone = true;
+            writeSseEvent(res, 'answer.done', {
+              answer: normalizeDoubaoDisplayText(readValue(accumulatedAnswer) || finalTextCandidate || '')
+            });
+          }
+        }
+      }
+    }
+
+    const tail = decoder.decode();
+    if (tail) {
+      buffer += tail;
+    }
+
+    if (buffer.trim()) {
+      const parsed = parseDoubaoSseBlock(buffer);
+      if (parsed) {
+        const payload = parsed.payload;
+        if (isDoubaoDeltaEvent(parsed.event)) {
+          const delta = extractVisibleDoubaoDelta(payload, parsed.event);
+          const incrementalDelta = getIncrementalText(accumulatedAnswer, delta);
+          if (incrementalDelta) {
+            accumulatedAnswer += incrementalDelta;
+            writeSseEvent(res, 'answer.delta', { delta: incrementalDelta });
+          }
+        }
+        const visibleText = extractVisibleDoubaoText(payload);
+        if (visibleText) {
+          finalTextCandidate = visibleText;
+        }
+        if (parsed.done && !sentDone) {
+          sentDone = true;
+          writeSseEvent(res, 'answer.done', {
+            answer: normalizeDoubaoDisplayText(readValue(accumulatedAnswer) || finalTextCandidate || '')
+          });
+        }
+      }
+    }
+
+    if (!closedByClient && !sentDone) {
+      writeSseEvent(res, 'answer.done', {
+        answer: normalizeDoubaoDisplayText(readValue(accumulatedAnswer) || finalTextCandidate || '')
+      });
+    }
+    if (!closedByClient) res.end();
+  } catch (error) {
+    if (!closedByClient) {
+      writeSseEvent(res, 'error', { error: error.message || '流式转发失败' });
+      res.end();
+    }
+  } finally {
+    req.off('close', abortStream);
+  }
 }
 
 function normalizeAliyunPreferredName(value) {
@@ -950,10 +1315,11 @@ async function handleDoubaoMultimodal(req, res) {
 
   try {
     const body = await readRequestBody(req);
-    const { model, image, imageMimeType, question } = body;
+    const { model, image, imageMimeType, question, history } = body;
+    const shouldStream = wantsDoubaoStream(body, req);
     const resolvedApiKey = readValue(SERVER_CONFIG.arkApiKey);
     const resolvedQuestion = readValue(question);
-    const resolvedModel = readValue(model) || 'doubao-1-5-vision-pro-250328';
+    const resolvedModel = readValue(model) || 'doubao-seed-2-0-pro-260215';
 
     if (!resolvedApiKey) {
       sendJson(res, 500, { error: '服务端未配置 ARK_API_KEY' });
@@ -965,12 +1331,27 @@ async function handleDoubaoMultimodal(req, res) {
       return;
     }
 
-    let normalizedImage;
-    try {
-      normalizedImage = normalizeBase64ImageInput(image, imageMimeType);
-    } catch (error) {
-      sendJson(res, 400, { error: error.message || '图片数据不合法' });
-      return;
+    const promptText = buildDoubaoPromptWithHistory(resolvedQuestion, history);
+    const content = [
+      {
+        type: 'input_text',
+        text: promptText
+      }
+    ];
+
+    if (readValue(image)) {
+      let normalizedImage;
+      try {
+        normalizedImage = normalizeBase64ImageInput(image, imageMimeType);
+      } catch (error) {
+        sendJson(res, 400, { error: error.message || '图片数据不合法' });
+        return;
+      }
+
+      content.push({
+        type: 'input_image',
+        image_url: normalizedImage.imageUrl
+      });
     }
 
     const upstreamRes = await fetch(upstreamUrl, {
@@ -981,23 +1362,22 @@ async function handleDoubaoMultimodal(req, res) {
       },
       body: JSON.stringify({
         model: resolvedModel,
+        stream: shouldStream,
         input: [
           {
             role: 'user',
-            content: [
-              {
-                type: 'input_text',
-                text: resolvedQuestion
-              },
-              {
-                type: 'input_image',
-                image_url: normalizedImage.imageUrl
-              }
-            ]
+            content
           }
         ]
       })
     });
+
+    const upstreamContentType = String(upstreamRes.headers.get('content-type') || '').toLowerCase();
+
+    if (shouldStream && upstreamRes.ok && upstreamContentType.includes('text/event-stream')) {
+      await proxySseStreamToClient(upstreamRes, req, res);
+      return;
+    }
 
     const responseText = await upstreamRes.text();
     let json = null;

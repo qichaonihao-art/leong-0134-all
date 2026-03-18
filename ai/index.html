@@ -83,6 +83,185 @@
       width: min(100%, 860px);
       margin: 0 auto;
     }
+    .app-view.hidden {
+      display: none;
+    }
+    .workspace-page {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    #doubaoView {
+      height: calc(100dvh - 76px);
+      min-height: 640px;
+      max-height: calc(100dvh - 76px);
+      overflow: hidden;
+      padding-top: 2px;
+    }
+    .doubao-layout {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+    }
+    #doubaoView .topbar {
+      flex-shrink: 0;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 6px 2px 10px;
+      min-height: 0;
+      border-radius: 0;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+      backdrop-filter: none;
+      overflow: visible;
+    }
+    #doubaoView .topbar::before,
+    #doubaoView .topbar::after {
+      display: none;
+    }
+    #doubaoView .hero-copy {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      max-width: none;
+    }
+    #doubaoView .hero-actions {
+      min-width: auto;
+      justify-content: flex-end;
+    }
+    .doubao-topbar-mark {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      box-shadow: 0 0 14px rgba(154,239,224,0.42);
+      flex-shrink: 0;
+    }
+    .doubao-topbar-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+    .doubao-topbar-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: rgba(247,255,252,0.96);
+      letter-spacing: -0.01em;
+    }
+    .doubao-topbar-subtitle {
+      font-size: 12px;
+      color: rgba(226,241,236,0.58);
+      line-height: 1.5;
+    }
+    #doubaoView .workspace-tools {
+      gap: 8px;
+    }
+    .workspace-topbar {
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+    .workspace-tools {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .home-panel {
+      padding: 28px 28px 30px;
+    }
+    .home-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(188,236,228,0.16);
+      color: rgba(244,255,251,0.88);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .home-kicker::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      box-shadow: 0 0 18px rgba(154,239,224,0.62);
+    }
+    .home-title {
+      font-size: clamp(30px, 4vw, 44px);
+      color: #f9fffd;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      text-shadow: 0 10px 30px rgba(0,0,0,0.24);
+      margin-bottom: 12px;
+    }
+    .home-subtitle {
+      font-size: 14px;
+      color: var(--text-soft);
+      line-height: 1.85;
+      max-width: 620px;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .feature-card {
+      padding: 22px 22px 20px;
+      border-radius: 24px;
+      border: 1px solid rgba(205,242,236,0.2);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.035)),
+        rgba(20,48,46,0.34);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        inset 0 0 0 1px rgba(205,242,236,0.035),
+        0 12px 26px rgba(6,24,22,0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .feature-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04)),
+        rgba(124,233,216,0.12);
+      border: 1px solid rgba(205,242,236,0.14);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+      font-size: 20px;
+    }
+    .feature-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fbfffd;
+    }
+    .feature-desc {
+      font-size: 13px;
+      color: rgba(228,241,237,0.72);
+      line-height: 1.75;
+      min-height: 66px;
+    }
+    .feature-actions {
+      display: flex;
+      justify-content: flex-start;
+    }
     .auth-screen {
       min-height: calc(100vh - 68px);
       display: none;
@@ -1096,6 +1275,15 @@
       color: rgba(236,248,244,0.82);
       margin-bottom: 8px;
     }
+    .image-preview-media {
+      display: block;
+      width: 100%;
+      max-height: 340px;
+      object-fit: contain;
+      border-radius: 14px;
+      background: rgba(7,22,24,0.32);
+      border: 1px solid rgba(205,242,236,0.12);
+    }
     audio {
       width: 100%;
       height: 42px;
@@ -1210,6 +1398,420 @@
       color: rgba(226,239,235,0.74);
       line-height: 1.75;
       margin-bottom: 14px;
+    }
+    .assistant-chat-shell {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      flex: 1;
+      min-height: 0;
+      height: 100%;
+      overflow: hidden;
+      padding: 0;
+      border-radius: 30px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.018)),
+        rgba(10,27,29,0.28);
+      border: 1px solid rgba(205,242,236,0.1);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.045),
+        inset 0 0 0 1px rgba(205,242,236,0.03),
+        0 12px 28px rgba(2,8,23,0.08);
+      backdrop-filter: blur(18px);
+    }
+    #doubaoImageInput {
+      display: none;
+    }
+    .assistant-chat-shell .step-header {
+      display: none;
+    }
+    .assistant-chat-stream {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+    }
+    .assistant-thread {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      min-height: 0;
+      margin-top: 0;
+      overflow: hidden;
+    }
+    .assistant-messages-wrap {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 18px 10px 12px;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(154,239,224,0.18) transparent;
+    }
+    .assistant-messages-rail {
+      width: min(100%, 744px);
+      min-height: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .assistant-messages-wrap::-webkit-scrollbar {
+      width: 10px;
+    }
+    .assistant-messages-wrap::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .assistant-messages-wrap::-webkit-scrollbar-thumb {
+      background: rgba(154,239,224,0.14);
+      border: 3px solid transparent;
+      border-radius: 999px;
+      background-clip: padding-box;
+    }
+    .assistant-messages-wrap:hover::-webkit-scrollbar-thumb {
+      background: rgba(154,239,224,0.22);
+      border: 3px solid transparent;
+      background-clip: padding-box;
+    }
+    .assistant-messages {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 100%;
+      padding: 6px 2px 14px;
+    }
+    .assistant-empty {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      justify-content: center;
+      min-height: 100%;
+      padding: 34px 22px 44px;
+      border-radius: 24px;
+      border: 1px dashed rgba(188,236,228,0.12);
+      background:
+        radial-gradient(circle at top, rgba(124,233,216,0.08), transparent 42%),
+        rgba(11,27,29,0.18);
+      color: rgba(226,241,236,0.72);
+    }
+    .assistant-empty-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: rgba(247,255,252,0.92);
+      letter-spacing: -0.02em;
+    }
+    .assistant-empty-text {
+      font-size: 14px;
+      line-height: 1.8;
+      max-width: 520px;
+    }
+    .assistant-message {
+      max-width: min(100%, 620px);
+      padding: 14px 16px;
+      border-radius: 22px;
+      border: 1px solid rgba(205,242,236,0.12);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        0 10px 22px rgba(2,8,23,0.06);
+    }
+    .assistant-message.user {
+      align-self: flex-end;
+      margin-left: auto;
+      border-top-right-radius: 10px;
+      background:
+        linear-gradient(180deg, rgba(124,233,216,0.16), rgba(255,255,255,0.035)),
+        rgba(32,86,77,0.38);
+      border-color: rgba(154,239,224,0.18);
+    }
+    .assistant-message.assistant {
+      align-self: flex-start;
+      margin-right: auto;
+      border-top-left-radius: 10px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.024)),
+        rgba(18,44,43,0.32);
+    }
+    .assistant-message-role {
+      font-size: 11px;
+      color: rgba(226,241,236,0.48);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+    .assistant-message-text {
+      font-size: 14px;
+      color: rgba(244,255,251,0.92);
+      line-height: 1.85;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .assistant-message-text-wrap {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      min-height: 20px;
+    }
+    .assistant-message-waiting {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      min-height: 24px;
+      padding: 3px 0 1px;
+    }
+    .assistant-message.pending.is-empty .assistant-message-waiting {
+      display: inline-flex;
+    }
+    .assistant-message.pending .assistant-message-caret {
+      display: inline-flex;
+    }
+    .assistant-message-waiting span,
+    .assistant-message-caret span {
+      display: block;
+      border-radius: 999px;
+      background: rgba(154,239,224,0.78);
+      box-shadow: 0 0 10px rgba(124,233,216,0.18);
+    }
+    .assistant-message-waiting span {
+      width: 7px;
+      height: 7px;
+      animation: assistantWaitingPulse 1.12s ease-in-out infinite;
+    }
+    .assistant-message-waiting span:nth-child(2) {
+      animation-delay: 0.14s;
+    }
+    .assistant-message-waiting span:nth-child(3) {
+      animation-delay: 0.28s;
+    }
+    .assistant-message-caret {
+      display: none;
+      align-items: center;
+      align-self: flex-end;
+      padding-bottom: 5px;
+      flex-shrink: 0;
+    }
+    .assistant-message-caret span {
+      width: 9px;
+      height: 18px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(199,244,186,0.88), rgba(124,233,216,0.82));
+      animation: assistantCaretBlink 0.92s ease-in-out infinite;
+    }
+    .assistant-message-image {
+      display: block;
+      width: min(100%, 280px);
+      border-radius: 16px;
+      border: 1px solid rgba(205,242,236,0.18);
+      overflow: hidden;
+      background: rgba(6,20,21,0.26);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+    .assistant-message-image img {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
+    .assistant-message-meta {
+      margin-top: 8px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: rgba(226,241,236,0.62);
+    }
+    .assistant-chat-composer {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 14px 18px 16px;
+      flex-shrink: 0;
+      width: 100%;
+      margin: 0;
+      border-top: 1px solid rgba(205,242,236,0.1);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)),
+        rgba(7,20,22,0.1);
+    }
+    .assistant-composer-bar {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      background:
+        linear-gradient(180deg, rgba(20,49,48,0.58), rgba(12,30,31,0.66)),
+        rgba(12,28,29,0.62);
+      border: 1px solid rgba(188,236,228,0.09);
+      border-radius: 24px;
+      padding: 9px 10px 9px 12px;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        inset 0 -1px 0 rgba(255,255,255,0.015);
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+      backdrop-filter: blur(14px);
+    }
+    .assistant-composer-bar:focus-within {
+      border-color: rgba(154,239,224,0.24);
+      box-shadow:
+        0 0 0 4px rgba(124,233,216,0.04),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .assistant-plus-btn {
+      width: 40px;
+      height: 40px;
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      color: rgba(244,255,251,0.68);
+      font-size: 21px;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: none;
+      transition: transform 0.18s ease, color 0.18s ease, background 0.18s ease;
+      flex-shrink: 0;
+    }
+    .assistant-plus-btn:hover {
+      transform: translateY(-1px);
+      color: rgba(244,255,251,0.9);
+      background: rgba(255,255,255,0.04);
+    }
+    .assistant-input-surface {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: stretch;
+    }
+    #doubaoQuestion {
+      width: 100%;
+      min-height: 72px;
+      max-height: 156px;
+      border: 0;
+      background: transparent;
+      color: #f4fffb;
+      border-radius: 0;
+      padding: 10px 6px;
+      font-size: 14px;
+      line-height: 1.75;
+      outline: none;
+      resize: none;
+      font-family: inherit;
+    }
+    #doubaoQuestion::placeholder {
+      color: rgba(215,232,226,0.38);
+      line-height: 1.75;
+    }
+    .assistant-send-btn {
+      align-self: stretch;
+      min-width: 74px;
+      border-radius: 16px;
+      padding: 0 12px;
+      flex-shrink: 0;
+      border: 0;
+      background:
+        linear-gradient(180deg, rgba(154,239,224,0.18), rgba(255,255,255,0.04)),
+        rgba(37,88,80,0.44);
+      color: #f5fffc;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        inset 0 0 0 1px rgba(154,239,224,0.08);
+    }
+    .assistant-chat-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 0 2px 0;
+    }
+    .assistant-chat-hint {
+      font-size: 12px;
+      line-height: 1.6;
+      color: rgba(228,241,237,0.48);
+    }
+    .assistant-chat-actions .status-bar {
+      margin-top: 0;
+      width: 100%;
+    }
+    .assistant-card .status-bar {
+      margin-top: 0;
+    }
+    .assistant-message.pending .assistant-message-text {
+      color: rgba(230,243,238,0.72);
+    }
+    @keyframes assistantWaitingPulse {
+      0%, 80%, 100% {
+        transform: translateY(0) scale(0.84);
+        opacity: 0.34;
+      }
+      40% {
+        transform: translateY(-1px) scale(1);
+        opacity: 0.96;
+      }
+    }
+    @keyframes assistantCaretBlink {
+      0%, 100% {
+        opacity: 0.22;
+        transform: scaleY(0.92);
+      }
+      50% {
+        opacity: 0.92;
+        transform: scaleY(1);
+      }
+    }
+    @media (max-width: 720px) {
+      #doubaoView {
+        height: calc(100dvh - 68px);
+        min-height: 0;
+        max-height: calc(100dvh - 68px);
+      }
+      .doubao-topbar-copy {
+        gap: 1px;
+      }
+      .doubao-topbar-title {
+        font-size: 15px;
+      }
+      .doubao-topbar-subtitle {
+        font-size: 11px;
+      }
+      .assistant-chat-shell {
+        gap: 10px;
+        border-radius: 24px;
+      }
+      .assistant-messages-wrap {
+        padding: 14px 6px 10px 2px;
+      }
+      .assistant-messages-rail,
+      .assistant-chat-composer {
+        width: 100%;
+      }
+      .assistant-chat-composer {
+        padding: 12px 12px 14px;
+      }
+      .assistant-composer-bar {
+        align-items: stretch;
+        flex-wrap: wrap;
+        border-radius: 24px;
+        padding: 10px;
+      }
+      .assistant-plus-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 13px;
+      }
+      .assistant-input-surface {
+        width: calc(100% - 58px);
+      }
+      .assistant-send-btn {
+        width: 100%;
+        min-height: 44px;
+      }
+      .assistant-chat-actions {
+        align-items: stretch;
+        padding: 0 2px 2px;
+      }
+      .assistant-message {
+        max-width: min(100%, 94%);
+      }
     }
     .text-area-block {
       margin-top: 4px;
@@ -1682,6 +2284,7 @@
 
     @media (max-width: 820px) {
       .glass-grid { grid-template-columns: 1fr; }
+      .feature-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 640px) {
       body { padding-top: 20px; }
@@ -1691,6 +2294,9 @@
       .auth-entry { gap: 8px; }
       .auth-login-btn { padding: 0 14px; }
       .topbar { flex-direction: column; }
+      .workspace-topbar { flex-direction: column; }
+      .workspace-tools { justify-content: flex-start; }
+      .home-panel { padding: 22px 20px 24px; }
       .hero-actions { width: 100%; justify-content: flex-start; }
       .provider-option { min-width: 100%; }
       .api-card-head { align-items: flex-start; }
@@ -1727,219 +2333,303 @@
     </section>
 
   <div class="app-shell hidden" id="appShell">
-    <div class="topbar">
-      <div class="hero-copy">
-        <div class="hero-kicker">Voice Clone Workspace</div>
-        <h1>凉飕飕</h1>
-        <p class="subtitle">面向内部同事的声音克隆工作台，智谱、火山、阿里云随意切换</p>
-      </div>
-      <div class="hero-actions">
-      <div class="btn-row">
-        <button class="ghost-btn" onclick="openDrawer()">我的音色</button>
-        <button class="ghost-btn" onclick="logout()">退出登录</button>
-      </div>
-      </div>
-    </div>
-
-    <div class="glass-card summary-card">
-      <div class="api-card-head">
-        <div class="summary-head-main">
-          <div class="glass-card-title">API 配置</div>
-          <div class="api-summary" id="apiSummary"></div>
+    <section class="app-view" id="homeView">
+      <div class="glass-card home-panel">
+        <div class="workspace-topbar">
+          <div class="hero-copy">
+            <div class="home-kicker">Tool Platform</div>
+            <h1 class="home-title">凉飕飕</h1>
+            <p class="home-subtitle">登录后先选择工具，再进入各自独立的工作区。首页只负责功能选择，便于后续继续扩展更多内部工具。</p>
+          </div>
+          <div class="workspace-tools">
+            <button class="ghost-btn" onclick="logout()">退出登录</button>
+          </div>
         </div>
-        <button class="ghost-btn ghost-light" id="apiToggleBtn" onclick="toggleApiPanel()">展开配置</button>
-      </div>
-      <div class="api-toggle-row">
-        <div class="api-panel-note" id="apiPanelNote"></div>
-      </div>
-      <div class="api-panel-body" id="apiPanelBody">
-      <div class="glass-grid">
-        <div class="provider-card">
-          <div class="provider-card-head">
-            <h3>智谱</h3>
-            <span class="provider-state" id="stateZhipu">未配置</span>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🎙️</div>
+            <div class="feature-title">声音克隆</div>
+            <div class="feature-desc">进入独立的声音克隆工作区，完成模型选择、音频上传、音色处理与语音生成。</div>
+            <div class="feature-actions">
+              <button class="btn btn-primary" type="button" onclick="switchAppView('voice')">进入工作区</button>
+            </div>
           </div>
-          <div class="field">
-            <label for="cfgZhipuKey">API Key</label>
-            <input id="cfgZhipuKey" type="password" placeholder="sk-..." />
+          <div class="feature-card">
+            <div class="feature-icon">🖼️</div>
+            <div class="feature-title">创意辅助</div>
+            <div class="feature-desc">进入独立的创意辅助工作区，可直接进行文本共创；上传图片后，会自动升级为图文理解、灵感延展与连续追问模式。</div>
+            <div class="feature-actions">
+              <button class="btn btn-primary" type="button" onclick="switchAppView('doubao')">进入工作区</button>
+            </div>
           </div>
-          <div class="provider-actions">
-            <button class="ghost-btn" onclick="saveProviderConfig('zhipu')">保存</button>
-            <button class="ghost-btn ghost-light" onclick="clearProviderConfig('zhipu')">清除配置</button>
-            <span class="mini-badge" id="badgeZhipu">已保存</span>
-          </div>
-          <div class="config-hint">继续沿用浏览器本地保存，刷新后仍可继续使用。</div>
-        </div>
-
-        <div class="provider-card">
-          <div class="provider-card-head">
-            <h3>代理服务</h3>
-            <span class="provider-state" id="stateProxy">自动识别</span>
-          </div>
-          <div class="field">
-            <label for="cfgProxyBaseUrl">代理地址</label>
-            <input id="cfgProxyBaseUrl" type="text" placeholder="留空时本地自动走当前 Node，线上可填 https://proxy.example.com" />
-          </div>
-          <div class="provider-actions">
-            <button class="ghost-btn" onclick="saveProviderConfig('proxy')">保存</button>
-            <button class="ghost-btn ghost-light" onclick="clearProviderConfig('proxy')">恢复自动</button>
-            <span class="mini-badge" id="badgeProxy">已保存</span>
-          </div>
-          <div class="config-hint">统一控制阿里云和火山的代理入口。本地开发可留空，正式部署后填你的线上代理域名。</div>
-        </div>
-
-        <div class="provider-card">
-          <div class="provider-card-head">
-            <h3>阿里云</h3>
-            <span class="provider-state" id="stateAliyun">未配置</span>
-          </div>
-          <div class="field">
-            <label for="cfgAliyunKey">API Key</label>
-            <input id="cfgAliyunKey" type="password" placeholder="sk-..." />
-          </div>
-          <div class="field">
-            <label for="cfgAliyunModel">目标模型</label>
-            <select id="cfgAliyunModel">
-              <option value="qwen3-tts-vc-realtime-2026-01-15">qwen3-tts-vc-realtime-2026-01-15</option>
-              <option value="qwen3-tts-vc-realtime-2025-11-27">qwen3-tts-vc-realtime-2025-11-27</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="cfgAliyunPreferredName">音色偏好名称</label>
-            <input id="cfgAliyunPreferredName" type="text" placeholder="例如：xiaosong / caiwu_voice" />
-          </div>
-          <div class="provider-actions">
-            <button class="ghost-btn" onclick="saveProviderConfig('aliyun')">保存</button>
-            <button class="ghost-btn ghost-light" onclick="clearProviderConfig('aliyun')">清除配置</button>
-            <span class="mini-badge" id="badgeAliyun">已保存</span>
-          </div>
-          <div class="config-hint">阿里云现在按 Qwen 声音复刻文档创建专属音色，并统一通过“代理服务地址”转发创建与生成请求。</div>
-        </div>
-
-        <div class="provider-card">
-          <div class="provider-card-head">
-            <h3>火山引擎</h3>
-            <span class="provider-state" id="stateVolc">未配置</span>
-          </div>
-          <div class="field">
-            <label for="cfgVolcAppKey">App Key</label>
-            <input id="cfgVolcAppKey" type="password" placeholder="APP ID" />
-          </div>
-          <div class="field">
-            <label for="cfgVolcAccessKey">Access Key</label>
-            <input id="cfgVolcAccessKey" type="password" placeholder="Access Token" />
-          </div>
-          <div class="field">
-            <label for="cfgVolcSpeakerId">Speaker ID</label>
-            <input id="cfgVolcSpeakerId" type="text" placeholder="S_xxxxxxx" />
-          </div>
-          <div class="field">
-            <label for="cfgVolcResourceId">复刻资源版本</label>
-            <select id="cfgVolcResourceId">
-              <option value="seed-icl-2.0">seed-icl-2.0</option>
-              <option value="seed-icl-1.0">seed-icl-1.0</option>
-            </select>
-          </div>
-          <div class="provider-actions">
-            <button class="ghost-btn" onclick="saveProviderConfig('volcengine')">保存</button>
-            <button class="ghost-btn ghost-light" onclick="clearProviderConfig('volcengine')">清除配置</button>
-            <span class="mini-badge" id="badgeVolc">已保存</span>
-          </div>
-          <div class="config-hint">火山的训练与生成也会统一走代理服务。如果提示 `resource ID is mismatched with speaker related resource`，通常是这里的资源版本和 `speaker_id` 实际所属版本不一致。</div>
         </div>
       </div>
-      </div>
-    </div>
+    </section>
 
-    <div class="status-pill" id="currentVoiceBar">
-      <div class="dot"></div>
-      <div class="text">当前声音：<strong id="currentVoiceName"></strong> <span id="currentVoiceProviderBadge"></span></div>
-      <button class="ghost-btn" onclick="changeVoice()">更换声音</button>
-    </div>
-
-    <div class="step-card active model-panel-card summary-card" id="card0">
-      <div class="api-card-head">
-        <div class="summary-head-main">
-          <div class="step-header">
-            <div class="step-num">🚩</div>
-            <div class="step-title">选择模型</div>
-          </div>
-          <div class="api-summary" id="providerSelectionSummary"></div>
+    <section class="app-view workspace-page hidden" id="voiceView">
+      <div class="topbar">
+        <div class="hero-copy">
+          <div class="hero-kicker">Voice Clone Workspace</div>
+          <h1>凉飕飕</h1>
+          <p class="subtitle">面向内部同事的声音克隆工作台，智谱、火山、阿里云随意切换</p>
         </div>
-        <button class="ghost-btn ghost-light" id="providerToggleBtn" onclick="toggleProviderPanel()"></button>
+        <div class="hero-actions">
+          <div class="workspace-tools">
+            <button class="ghost-btn" onclick="switchAppView('home')">返回工具首页</button>
+            <button class="ghost-btn" onclick="openDrawer()">我的音色</button>
+            <button class="ghost-btn" onclick="logout()">退出登录</button>
+          </div>
+        </div>
       </div>
-      <div class="api-toggle-row">
-        <div class="api-panel-note" id="providerPanelNote"></div>
-      </div>
-      <div class="api-panel-body" id="providerPanelBody">
-        <div class="provider-selector" id="providerSelector"></div>
-        <div class="inline-note" id="providerSummary"></div>
-      </div>
-    </div>
 
-    <div class="step-card active" id="card1">
-      <div class="step-header">
-        <div class="step-num" id="num1">🚩</div>
-        <div class="step-title">上传音频</div>
-        <div class="step-desc">时长需 ≥ 10 秒</div>
-      </div>
-      <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
-        <div class="upload-icon">🎙️</div>
-        <div class="upload-text" id="uploadText">点击选择音频文件</div>
-        <div class="upload-hint">支持 MP3、WAV、M4A、AAC 等常见音频格式</div>
-      </div>
-      <input id="fileInput" type="file" accept="audio/*" />
-      <div class="audio-preview" id="originalPreview">
-        <div class="audio-preview-label">原始音频预览</div>
-        <audio id="originalAudio" controls></audio>
-      </div>
-      <div class="status-bar hidden" id="status1"></div>
-    </div>
+      <div class="glass-card summary-card">
+        <div class="api-card-head">
+          <div class="summary-head-main">
+            <div class="glass-card-title">API 配置</div>
+            <div class="api-summary" id="apiSummary"></div>
+          </div>
+          <button class="ghost-btn ghost-light" id="apiToggleBtn" onclick="toggleApiPanel()">展开配置</button>
+        </div>
+        <div class="api-toggle-row">
+          <div class="api-panel-note" id="apiPanelNote"></div>
+        </div>
+        <div class="api-panel-body" id="apiPanelBody">
+        <div class="glass-grid">
+          <div class="provider-card">
+            <div class="provider-card-head">
+              <h3>智谱</h3>
+              <span class="provider-state" id="stateZhipu">未配置</span>
+            </div>
+            <div class="field">
+              <label for="cfgZhipuKey">API Key</label>
+              <input id="cfgZhipuKey" type="password" placeholder="sk-..." />
+            </div>
+            <div class="provider-actions">
+              <button class="ghost-btn" onclick="saveProviderConfig('zhipu')">保存</button>
+              <button class="ghost-btn ghost-light" onclick="clearProviderConfig('zhipu')">清除配置</button>
+              <span class="mini-badge" id="badgeZhipu">已保存</span>
+            </div>
+            <div class="config-hint">继续沿用浏览器本地保存，刷新后仍可继续使用。</div>
+          </div>
 
-    <div class="step-card disabled" id="card2">
-      <div class="step-header">
-        <div class="step-num" id="num2">🚩</div>
-        <div class="step-title">克隆声音</div>
-      </div>
-      <div class="provider-hint" id="cloneHint"></div>
-      <div class="status-bar hidden" id="status2"></div>
-      <div class="btn-row">
-        <button class="btn btn-primary" id="btnClone" onclick="cloneVoice()" disabled>开始处理</button>
-      </div>
-    </div>
+          <div class="provider-card">
+            <div class="provider-card-head">
+              <h3>代理服务</h3>
+              <span class="provider-state" id="stateProxy">自动识别</span>
+            </div>
+            <div class="field">
+              <label for="cfgProxyBaseUrl">代理地址</label>
+              <input id="cfgProxyBaseUrl" type="text" placeholder="留空时本地自动走当前 Node，线上可填 https://proxy.example.com" />
+            </div>
+            <div class="provider-actions">
+              <button class="ghost-btn" onclick="saveProviderConfig('proxy')">保存</button>
+              <button class="ghost-btn ghost-light" onclick="clearProviderConfig('proxy')">恢复自动</button>
+              <span class="mini-badge" id="badgeProxy">已保存</span>
+            </div>
+            <div class="config-hint">统一控制阿里云和火山的代理入口。本地开发可留空，正式部署后填你的线上代理域名。</div>
+          </div>
 
-    <div class="step-card disabled" id="card3">
-      <div class="step-header">
-        <div class="step-num" id="num3">🚩</div>
-        <div class="step-title">输入新文本</div>
-      </div>
-      <div class="text-area-block">
-        <textarea id="inputText" placeholder="例如：远上寒山石径斜，白云生处有人家。停车坐爱枫林晚，霜叶红于二月花。" oninput="updateCharCount()"></textarea>
-      </div>
-      <div class="char-count"><span id="charCount">0</span> 字</div>
-      <div class="status-bar hidden" id="status3"></div>
-      <div class="debug-toolbar" id="debugToolbar">
-        <label class="debug-toggle" for="volcDebugToggle">
-          <input id="volcDebugToggle" type="checkbox" />
-          <span>显示火山调试信息</span>
-        </label>
-        <small>仅本地调试阶段显示，正式给同事使用时可关闭。</small>
-      </div>
-      <div class="debug-panel" id="volcDebugPanel"></div>
-      <div class="btn-row">
-        <button class="btn btn-primary" id="btnGenerate" onclick="generateSpeech()" disabled>生成语音</button>
-      </div>
-    </div>
+          <div class="provider-card">
+            <div class="provider-card-head">
+              <h3>阿里云</h3>
+              <span class="provider-state" id="stateAliyun">未配置</span>
+            </div>
+            <div class="field">
+              <label for="cfgAliyunKey">API Key</label>
+              <input id="cfgAliyunKey" type="password" placeholder="sk-..." />
+            </div>
+            <div class="field">
+              <label for="cfgAliyunModel">目标模型</label>
+              <select id="cfgAliyunModel">
+                <option value="qwen3-tts-vc-realtime-2026-01-15">qwen3-tts-vc-realtime-2026-01-15</option>
+                <option value="qwen3-tts-vc-realtime-2025-11-27">qwen3-tts-vc-realtime-2025-11-27</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="cfgAliyunPreferredName">音色偏好名称</label>
+              <input id="cfgAliyunPreferredName" type="text" placeholder="例如：xiaosong / caiwu_voice" />
+            </div>
+            <div class="provider-actions">
+              <button class="ghost-btn" onclick="saveProviderConfig('aliyun')">保存</button>
+              <button class="ghost-btn ghost-light" onclick="clearProviderConfig('aliyun')">清除配置</button>
+              <span class="mini-badge" id="badgeAliyun">已保存</span>
+            </div>
+            <div class="config-hint">阿里云现在按 Qwen 声音复刻文档创建专属音色，并统一通过“代理服务地址”转发创建与生成请求。</div>
+          </div>
 
-    <div class="step-card disabled" id="card4">
-      <div class="step-header">
-        <div class="step-num" id="num4">🚩</div>
-        <div class="step-title">生成结果</div>
-        <div class="step-desc" id="resultCount"></div>
+          <div class="provider-card">
+            <div class="provider-card-head">
+              <h3>火山引擎</h3>
+              <span class="provider-state" id="stateVolc">未配置</span>
+            </div>
+            <div class="field">
+              <label for="cfgVolcAppKey">App Key</label>
+              <input id="cfgVolcAppKey" type="password" placeholder="APP ID" />
+            </div>
+            <div class="field">
+              <label for="cfgVolcAccessKey">Access Key</label>
+              <input id="cfgVolcAccessKey" type="password" placeholder="Access Token" />
+            </div>
+            <div class="field">
+              <label for="cfgVolcSpeakerId">Speaker ID</label>
+              <input id="cfgVolcSpeakerId" type="text" placeholder="S_xxxxxxx" />
+            </div>
+            <div class="field">
+              <label for="cfgVolcResourceId">复刻资源版本</label>
+              <select id="cfgVolcResourceId">
+                <option value="seed-icl-2.0">seed-icl-2.0</option>
+                <option value="seed-icl-1.0">seed-icl-1.0</option>
+              </select>
+            </div>
+            <div class="provider-actions">
+              <button class="ghost-btn" onclick="saveProviderConfig('volcengine')">保存</button>
+              <button class="ghost-btn ghost-light" onclick="clearProviderConfig('volcengine')">清除配置</button>
+              <span class="mini-badge" id="badgeVolc">已保存</span>
+            </div>
+            <div class="config-hint">火山的训练与生成也会统一走代理服务。如果提示 `resource ID is mismatched with speaker related resource`，通常是这里的资源版本和 `speaker_id` 实际所属版本不一致。</div>
+          </div>
+        </div>
+        </div>
       </div>
-      <div class="status-bar hidden" id="status4"></div>
-      <div class="result-list" id="resultList"></div>
-    </div>
+
+      <div class="status-pill" id="currentVoiceBar">
+        <div class="dot"></div>
+        <div class="text">当前声音：<strong id="currentVoiceName"></strong> <span id="currentVoiceProviderBadge"></span></div>
+        <button class="ghost-btn" onclick="changeVoice()">更换声音</button>
+      </div>
+
+      <div class="step-card active model-panel-card summary-card" id="card0">
+        <div class="api-card-head">
+          <div class="summary-head-main">
+            <div class="step-header">
+              <div class="step-num">🚩</div>
+              <div class="step-title">选择模型</div>
+            </div>
+            <div class="api-summary" id="providerSelectionSummary"></div>
+          </div>
+          <button class="ghost-btn ghost-light" id="providerToggleBtn" onclick="toggleProviderPanel()"></button>
+        </div>
+        <div class="api-toggle-row">
+          <div class="api-panel-note" id="providerPanelNote"></div>
+        </div>
+        <div class="api-panel-body" id="providerPanelBody">
+          <div class="provider-selector" id="providerSelector"></div>
+          <div class="inline-note" id="providerSummary"></div>
+        </div>
+      </div>
+
+      <div class="step-card active" id="card1">
+        <div class="step-header">
+          <div class="step-num" id="num1">🚩</div>
+          <div class="step-title">上传音频</div>
+          <div class="step-desc">时长需 ≥ 10 秒</div>
+        </div>
+        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-icon">🎙️</div>
+          <div class="upload-text" id="uploadText">点击选择音频文件</div>
+          <div class="upload-hint">支持 MP3、WAV、M4A、AAC 等常见音频格式</div>
+        </div>
+        <input id="fileInput" type="file" accept="audio/*" />
+        <div class="audio-preview" id="originalPreview">
+          <div class="audio-preview-label">原始音频预览</div>
+          <audio id="originalAudio" controls></audio>
+        </div>
+        <div class="status-bar hidden" id="status1"></div>
+      </div>
+
+      <div class="step-card disabled" id="card2">
+        <div class="step-header">
+          <div class="step-num" id="num2">🚩</div>
+          <div class="step-title">克隆声音</div>
+        </div>
+        <div class="provider-hint" id="cloneHint"></div>
+        <div class="status-bar hidden" id="status2"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btnClone" onclick="cloneVoice()" disabled>开始处理</button>
+        </div>
+      </div>
+
+      <div class="step-card disabled" id="card3">
+        <div class="step-header">
+          <div class="step-num" id="num3">🚩</div>
+          <div class="step-title">输入新文本</div>
+        </div>
+        <div class="text-area-block">
+          <textarea id="inputText" placeholder="例如：远上寒山石径斜，白云生处有人家。停车坐爱枫林晚，霜叶红于二月花。" oninput="updateCharCount()"></textarea>
+        </div>
+        <div class="char-count"><span id="charCount">0</span> 字</div>
+        <div class="status-bar hidden" id="status3"></div>
+        <div class="debug-toolbar" id="debugToolbar">
+          <label class="debug-toggle" for="volcDebugToggle">
+            <input id="volcDebugToggle" type="checkbox" />
+            <span>显示火山调试信息</span>
+          </label>
+          <small>仅本地调试阶段显示，正式给同事使用时可关闭。</small>
+        </div>
+        <div class="debug-panel" id="volcDebugPanel"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btnGenerate" onclick="generateSpeech()" disabled>生成语音</button>
+        </div>
+      </div>
+
+      <div class="step-card disabled" id="card4">
+        <div class="step-header">
+          <div class="step-num" id="num4">🚩</div>
+          <div class="step-title">生成结果</div>
+          <div class="step-desc" id="resultCount"></div>
+        </div>
+        <div class="status-bar hidden" id="status4"></div>
+        <div class="result-list" id="resultList"></div>
+      </div>
+    </section>
+
+    <section class="app-view workspace-page hidden" id="doubaoView">
+      <div class="doubao-layout">
+        <div class="topbar">
+          <div class="hero-copy">
+            <div class="doubao-topbar-mark"></div>
+            <div class="doubao-topbar-copy">
+              <div class="doubao-topbar-title">创意辅助</div>
+              <div class="doubao-topbar-subtitle">文字直聊，图片可选，围绕当前上下文持续共创</div>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <div class="workspace-tools">
+              <button class="ghost-btn" onclick="switchAppView('home')">返回工具首页</button>
+              <button class="ghost-btn" onclick="logout()">退出登录</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card active assistant-card assistant-chat-shell" id="doubaoCard">
+          <div class="assistant-chat-stream">
+            <div class="assistant-thread" id="doubaoThread">
+              <div class="assistant-messages-wrap" id="doubaoMessagesWrap">
+                <div class="assistant-messages-rail">
+                  <div class="assistant-messages" id="doubaoMessages"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="assistant-chat-composer">
+            <input id="doubaoImageInput" type="file" accept="image/*" />
+            <div class="assistant-composer-bar">
+              <button class="assistant-plus-btn" type="button" aria-label="上传图片" onclick="document.getElementById('doubaoImageInput').click()">+</button>
+              <div class="assistant-input-surface">
+                <textarea id="doubaoQuestion" placeholder="发送消息，或先上传一张图片再继续追问。"></textarea>
+              </div>
+              <button class="btn btn-primary assistant-send-btn" id="doubaoSubmitBtn" onclick="submitDoubaoMultimodal()">发送</button>
+            </div>
+
+            <div class="assistant-chat-actions">
+              <div class="assistant-chat-hint">Shift + Enter 换行，Enter 发送。</div>
+              <div class="status-bar hidden" id="doubaoStatus"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
   </div>
 
@@ -2016,6 +2706,12 @@
     let isApiPanelOpen = false;
     let isProviderPanelOpen = true;
     let isAuthenticated = false;
+    let currentAppView = 'home';
+    const APP_HISTORY_STATE_KEY = 'liangsousou_app_view';
+    let doubaoImageFile = null;
+    let doubaoImageDataUrl = '';
+    let doubaoConversationHistory = [];
+    let doubaoMessageSeq = 0;
     let serverConfigStatus = {
       loaded: false,
       reachable: false,
@@ -2047,6 +2743,74 @@
 
     function uid(prefix) {
       return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+    }
+
+    function normalizeAppView(view) {
+      return view === 'voice' || view === 'doubao' ? view : 'home';
+    }
+
+    function getAppViewFromHash(hashValue) {
+      const hash = String(hashValue || location.hash || '').replace(/^#/, '').toLowerCase();
+      if (hash === 'voice') return 'voice';
+      if (hash === 'doubao' || hash === 'creative') return 'doubao';
+      if (hash === 'home') return 'home';
+      if (hash === 'login') return 'login';
+      return '';
+    }
+
+    function getAppStateFromHistory(state) {
+      if (!state || state[APP_HISTORY_STATE_KEY] !== true) return null;
+      return {
+        authenticated: !!state.authenticated,
+        view: state.view === 'login' ? 'login' : normalizeAppView(state.view)
+      };
+    }
+
+    function buildAppHistoryState(authenticated, view) {
+      const resolvedView = authenticated ? normalizeAppView(view) : 'login';
+      return {
+        [APP_HISTORY_STATE_KEY]: true,
+        authenticated: !!authenticated,
+        view: resolvedView
+      };
+    }
+
+    function buildAppHistoryUrl(authenticated, view) {
+      const resolvedView = authenticated ? normalizeAppView(view) : 'login';
+      const hash = resolvedView === 'doubao' ? 'creative' : resolvedView;
+      return location.pathname + location.search + '#' + hash;
+    }
+
+    function syncAppHistory(authenticated, view, mode) {
+      if (!window.history || typeof window.history.pushState !== 'function') return;
+      const method = mode === 'push' ? 'pushState' : 'replaceState';
+      const state = buildAppHistoryState(authenticated, view);
+      const targetUrl = buildAppHistoryUrl(authenticated, view);
+      const currentState = getAppStateFromHistory(window.history.state);
+
+      if (
+        method === 'replaceState' &&
+        currentState &&
+        currentState.authenticated === state.authenticated &&
+        currentState.view === state.view &&
+        location.hash === targetUrl.slice(targetUrl.indexOf('#'))
+      ) {
+        return;
+      }
+
+      window.history[method](state, '', targetUrl);
+    }
+
+    function getPreferredAuthedView() {
+      const state = getAppStateFromHistory(window.history.state);
+      if (state && state.authenticated) {
+        return normalizeAppView(state.view);
+      }
+      const hashView = getAppViewFromHash(location.hash);
+      if (hashView && hashView !== 'login') {
+        return normalizeAppView(hashView);
+      }
+      return 'home';
     }
 
     function escHtml(str) {
@@ -2103,7 +2867,8 @@
       }
     }
 
-    function applyAuthUiState(authenticated) {
+    function applyAuthUiState(authenticated, options) {
+      const opts = options || {};
       isAuthenticated = !!authenticated;
       document.body.classList.toggle('auth-locked', !isAuthenticated);
       document.getElementById('authScreen').classList.toggle('show', !isAuthenticated);
@@ -2114,10 +2879,33 @@
         document.getElementById('loginPassword').value = '';
         updateAuthPasswordUi();
         setAuthLoading('');
+        currentAppView = 'home';
+        syncAppHistory(false, 'login', opts.historyMode || 'replace');
       } else {
         setAuthError('');
         setAuthLoading('');
+        const nextView = normalizeAppView(opts.view || getPreferredAuthedView());
+        switchAppView(nextView, {
+          skipHistory: true
+        });
+        syncAppHistory(true, nextView, opts.historyMode || 'replace');
       }
+    }
+
+    function switchAppView(view, options) {
+      const opts = options || {};
+      currentAppView = normalizeAppView(view);
+      document.getElementById('homeView').classList.toggle('hidden', currentAppView !== 'home');
+      document.getElementById('voiceView').classList.toggle('hidden', currentAppView !== 'voice');
+      document.getElementById('doubaoView').classList.toggle('hidden', currentAppView !== 'doubao');
+      if (currentAppView !== 'voice') {
+        closeDrawer();
+        closeSaveModal();
+      }
+      if (isAuthenticated && !opts.skipHistory) {
+        syncAppHistory(true, currentAppView, opts.historyMode || 'push');
+      }
+      window.scrollTo({ top: 0, behavior: 'auto' });
     }
 
     function showStatus(id, type, message, loading) {
@@ -2248,9 +3036,14 @@
       try {
         const res = await fetchAuth('/api/auth/status');
         const json = await res.json();
-        applyAuthUiState(!!(res.ok && json && json.authenticated));
+        applyAuthUiState(!!(res.ok && json && json.authenticated), {
+          historyMode: 'replace',
+          view: getPreferredAuthedView()
+        });
       } catch (error) {
-        applyAuthUiState(false);
+        applyAuthUiState(false, {
+          historyMode: 'replace'
+        });
         setAuthError('无法连接登录服务，请先确认 Node 服务已启动。');
       }
     }
@@ -2278,9 +3071,14 @@
         if (!res.ok) {
           throw new Error((json && json.error) || '登录失败');
         }
-        applyAuthUiState(true);
+        applyAuthUiState(true, {
+          historyMode: 'replace',
+          view: 'home'
+        });
       } catch (error) {
-        applyAuthUiState(false);
+        applyAuthUiState(false, {
+          historyMode: 'replace'
+        });
         setAuthError(error.message || '密码错误，请重试');
       } finally {
         setAuthLoading('');
@@ -2291,7 +3089,9 @@
       try {
         await fetchAuth('/api/auth/logout', { method: 'POST' });
       } catch (error) {}
-      applyAuthUiState(false);
+      applyAuthUiState(false, {
+        historyMode: 'replace'
+      });
     }
 
     function isProviderConfigured(provider, configs) {
@@ -2971,6 +3771,508 @@
       });
     }
 
+    function scrollDoubaoMessagesToBottom() {
+      const wrap = document.getElementById('doubaoMessagesWrap');
+      if (!wrap) return;
+      wrap.scrollTop = wrap.scrollHeight;
+    }
+
+    function getDoubaoTextHistory() {
+      return doubaoConversationHistory
+        .filter(function(item) {
+          return item && item.type === 'text' && item.content;
+        })
+        .map(function(item) {
+          return {
+            role: item.role === 'assistant' ? 'assistant' : 'user',
+            content: item.content
+          };
+        });
+    }
+
+    function extractDoubaoResponseText(payload) {
+      if (!payload || typeof payload !== 'object') return '';
+      if (typeof payload.answer === 'string' && payload.answer) return payload.answer;
+      if (typeof payload.output_text === 'string' && payload.output_text) return payload.output_text;
+      if (payload.response && typeof payload.response.output_text === 'string' && payload.response.output_text) {
+        return payload.response.output_text;
+      }
+
+      const containers = [payload, payload.response, payload.item].filter(Boolean);
+      const textParts = [];
+
+      containers.forEach(function(item) {
+        if (!item || typeof item !== 'object') return;
+        if (isDoubaoReasoningEvent(item.type)) return;
+        if (typeof item.text === 'string' && item.text) textParts.push(item.text);
+        if (Array.isArray(item.content)) {
+          item.content.forEach(function(contentItem) {
+            if (!contentItem || typeof contentItem !== 'object') return;
+            if (isDoubaoReasoningEvent(contentItem.type)) return;
+            if (typeof contentItem.text === 'string' && contentItem.text) textParts.push(contentItem.text);
+          });
+        }
+      });
+
+      return textParts.join('\n').trim();
+    }
+
+    function isDoubaoReasoningEvent(value) {
+      return /reason|think|analysis/i.test(String(value || ''));
+    }
+
+    function isDoubaoDeltaEvent(value) {
+      return /delta/i.test(String(value || ''));
+    }
+
+    function extractDoubaoStreamDelta(payload) {
+      if (!payload || typeof payload !== 'object') return '';
+      if (isDoubaoReasoningEvent(payload.type)) return '';
+      if (typeof payload.delta === 'string') return payload.delta;
+      if (payload.delta && !isDoubaoReasoningEvent(payload.delta.type) && typeof payload.delta.text === 'string') return payload.delta.text;
+      if (payload.data && !isDoubaoReasoningEvent(payload.data.type) && typeof payload.data.delta === 'string') return payload.data.delta;
+      if (payload.data && payload.data.delta && !isDoubaoReasoningEvent(payload.data.delta.type) && typeof payload.data.delta.text === 'string') return payload.data.delta.text;
+
+      const containers = [payload.delta, payload.item, payload.data].filter(Boolean);
+      for (const item of containers) {
+        if (!item || typeof item !== 'object') continue;
+        if (isDoubaoReasoningEvent(item.type)) continue;
+        if (typeof item.text === 'string' && item.text) return item.text;
+        if (Array.isArray(item.content)) {
+          for (const contentItem of item.content) {
+            if (!contentItem || typeof contentItem !== 'object') continue;
+            if (isDoubaoReasoningEvent(contentItem.type)) continue;
+            if (typeof contentItem.text === 'string' && contentItem.text) return contentItem.text;
+          }
+        }
+      }
+
+      return '';
+    }
+
+    function getIncrementalDoubaoText(baseText, incomingText) {
+      const base = String(baseText || '');
+      const incoming = String(incomingText || '');
+      if (!incoming) return '';
+      if (!base) return incoming;
+      if (incoming === base) return '';
+      if (incoming.startsWith(base)) return incoming.slice(base.length);
+
+      const maxOverlap = Math.min(base.length, incoming.length);
+      for (let overlap = maxOverlap; overlap > 0; overlap -= 1) {
+        if (base.slice(-overlap) === incoming.slice(0, overlap)) {
+          return incoming.slice(overlap);
+        }
+      }
+
+      return incoming;
+    }
+
+    function normalizeDoubaoCompareText(value) {
+      return String(value || '')
+        .toLowerCase()
+        .replace(/[#*_`>\-\s]/g, '')
+        .replace(/[，。、“”‘’；：:,.!?！？（）()【】\[\]《》<>]/g, '');
+    }
+
+    function normalizeDoubaoDisplayText(value) {
+      const raw = String(value || '').replace(/\r\n/g, '\n').trim();
+      if (!raw) return '';
+
+      const lines = raw.split('\n').map(function(line) {
+        return line.trim();
+      });
+      const dedupedLines = [];
+
+      lines.forEach(function(line) {
+        if (!line && dedupedLines[dedupedLines.length - 1] === '') return;
+        if (line && dedupedLines[dedupedLines.length - 1] === line) return;
+        dedupedLines.push(line);
+      });
+
+      const filteredLines = [];
+      for (let i = 0; i < dedupedLines.length; i += 1) {
+        const current = dedupedLines[i];
+        if (!current) {
+          filteredLines.push(current);
+          continue;
+        }
+
+        const currentNormalized = normalizeDoubaoCompareText(current);
+        let duplicatedByFollowingBlock = false;
+
+        for (let span = 2; span <= 6; span += 1) {
+          const nextLines = dedupedLines.slice(i + 1, i + 1 + span).filter(Boolean);
+          if (nextLines.length < span) continue;
+          const merged = normalizeDoubaoCompareText(nextLines.join(''));
+          if (merged && merged === currentNormalized) {
+            duplicatedByFollowingBlock = true;
+            break;
+          }
+        }
+
+        if (!duplicatedByFollowingBlock) {
+          filteredLines.push(current);
+        }
+      }
+
+      return filteredLines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+    }
+
+    function parseDoubaoSseEvent(rawBlock) {
+      const lines = String(rawBlock || '').split(/\r?\n/);
+      let eventName = '';
+      const dataLines = [];
+
+      lines.forEach(function(line) {
+        if (line.startsWith('event:')) {
+          eventName = line.slice(6).trim();
+          return;
+        }
+        if (line.startsWith('data:')) {
+          dataLines.push(line.slice(5).trimStart());
+        }
+      });
+
+      const rawData = dataLines.join('\n').trim();
+      if (!rawData) return null;
+      if (rawData === '[DONE]') {
+        return { done: true, event: eventName || 'done' };
+      }
+
+      let payload = null;
+      try {
+        payload = JSON.parse(rawData);
+      } catch {
+        return null;
+      }
+
+      return {
+        event: eventName || (payload && payload.type) || 'message',
+        done: payload && (payload.type === 'response.completed' || payload.type === 'response.done' || payload.done === true),
+        error: payload && payload.error ? (payload.error.message || payload.error) : (payload && payload.type === 'error' ? (payload.message || '流式响应失败') : ''),
+        delta: extractDoubaoStreamDelta(payload),
+        fullText: extractDoubaoResponseText(payload),
+        payload: payload
+      };
+    }
+
+    async function consumeDoubaoStreamResponse(response, pendingMessageId) {
+      if (!response.body) {
+        throw new Error('当前环境不支持流式读取');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let finalTextCandidate = '';
+      let sawDelta = false;
+      let answer = '';
+
+      while (true) {
+        const result = await reader.read();
+        const done = result.done;
+        const value = result.value;
+
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const chunks = buffer.split(/\n\n/);
+        buffer = chunks.pop() || '';
+
+        chunks.forEach(function(block) {
+          const parsed = parseDoubaoSseEvent(block);
+          if (!parsed) return;
+          if (parsed.error) {
+            throw new Error(parsed.error);
+          }
+          if (isDoubaoReasoningEvent(parsed.event)) {
+            return;
+          }
+          if (parsed.fullText) {
+            finalTextCandidate = parsed.fullText;
+          }
+          if (isDoubaoDeltaEvent(parsed.event) && parsed.delta) {
+            const incrementalDelta = getIncrementalDoubaoText(answer, parsed.delta);
+            if (!incrementalDelta) {
+              return;
+            }
+            sawDelta = true;
+            answer += incrementalDelta;
+            updateDoubaoMessage(pendingMessageId, {
+              content: answer,
+              pending: true
+            });
+          }
+          if (parsed.done && parsed.fullText) {
+            finalTextCandidate = parsed.fullText;
+          }
+        });
+      }
+
+      const tail = decoder.decode();
+      if (tail) {
+        buffer += tail;
+      }
+      if (buffer.trim()) {
+        const parsedTail = parseDoubaoSseEvent(buffer);
+        if (parsedTail) {
+          if (parsedTail.error) {
+            throw new Error(parsedTail.error);
+          }
+          if (!isDoubaoReasoningEvent(parsedTail.event)) {
+            if (parsedTail.fullText) {
+              finalTextCandidate = parsedTail.fullText;
+            }
+            if (isDoubaoDeltaEvent(parsedTail.event) && parsedTail.delta) {
+              const incrementalDelta = getIncrementalDoubaoText(answer, parsedTail.delta);
+              if (!incrementalDelta) {
+                return;
+              }
+              sawDelta = true;
+              answer += incrementalDelta;
+            }
+            if (parsedTail.done && parsedTail.fullText) {
+              finalTextCandidate = parsedTail.fullText;
+            }
+          }
+        }
+      }
+
+      const finalAnswer = normalizeDoubaoDisplayText(finalTextCandidate || (!sawDelta ? answer : '') || answer);
+      return String(finalAnswer || '').trim();
+    }
+
+    function renderDoubaoConversation() {
+      const list = document.getElementById('doubaoMessages');
+
+      if (!doubaoConversationHistory.length) {
+        list.innerHTML = [
+          '<div class="assistant-empty">',
+          '<div class="assistant-empty-title">创意问题随便问…</div>',
+          '<div class="assistant-empty-text">直接输入文字就能开始交流；如果你想结合图片一起发散灵感，也可以点击下方加号上传图片，它会作为当前会话的上下文继续保留。</div>',
+          '</div>'
+        ].join('');
+        return;
+      }
+
+      list.innerHTML = doubaoConversationHistory.map(function(item) {
+        const role = item.role === 'assistant' ? 'assistant' : 'user';
+        const roleLabel = role === 'assistant' ? '创意小能手' : '用户消息';
+        const hasContent = !!String(item.content || '').trim();
+        if (item.type === 'image' && item.imageUrl) {
+          return [
+            '<div class="assistant-message ' + escHtml(role) + '" data-doubao-message-id="' + escHtml(item.id || '') + '">',
+            '<div class="assistant-message-role">' + escHtml(roleLabel) + '</div>',
+            '<div class="assistant-message-image"><img src="' + escHtml(item.imageUrl) + '" alt="' + escHtml(item.fileName || '用户上传图片') + '" /></div>',
+            '<div class="assistant-message-meta">已加入当前会话上下文' + (item.fileName ? ' · ' + escHtml(item.fileName) : '') + '</div>',
+            '</div>'
+          ].join('');
+        }
+
+        return [
+          '<div class="assistant-message ' + escHtml(role) + (item.pending ? ' pending' : '') + (!hasContent ? ' is-empty' : '') + '" data-doubao-message-id="' + escHtml(item.id || '') + '">',
+          '<div class="assistant-message-role">' + escHtml(roleLabel) + '</div>',
+          '<div class="assistant-message-text-wrap">',
+          '<div class="assistant-message-text">' + escHtml(item.content || '') + '</div>',
+          '<div class="assistant-message-waiting" aria-hidden="true"><span></span><span></span><span></span></div>',
+          '<div class="assistant-message-caret" aria-hidden="true"><span></span></div>',
+          '</div>',
+          '</div>'
+        ].join('');
+      }).join('');
+      scrollDoubaoMessagesToBottom();
+    }
+
+    function resetDoubaoConversation() {
+      doubaoConversationHistory = [];
+      renderDoubaoConversation();
+    }
+
+    function appendDoubaoMessage(role, content, type, meta) {
+      const resolvedType = type || 'text';
+      const normalizedRole = role === 'assistant' ? 'assistant' : 'user';
+      const entry = {
+        id: 'doubao-msg-' + (++doubaoMessageSeq),
+        role: normalizedRole,
+        type: resolvedType
+      };
+
+      if (resolvedType === 'image') {
+        entry.imageUrl = meta && meta.imageUrl ? String(meta.imageUrl) : '';
+        entry.fileName = meta && meta.fileName ? String(meta.fileName) : '';
+        if (!entry.imageUrl) return;
+      } else {
+        entry.content = String(content || '').trim();
+        entry.pending = !!(meta && meta.pending);
+        if (!entry.content && !entry.pending) return;
+      }
+
+      doubaoConversationHistory.push({
+        id: entry.id,
+        role: entry.role,
+        type: entry.type,
+        content: entry.content || '',
+        imageUrl: entry.imageUrl || '',
+        fileName: entry.fileName || '',
+        pending: !!entry.pending
+      });
+      renderDoubaoConversation();
+      return entry.id;
+    }
+
+    function patchDoubaoMessageDom(messageId) {
+      const message = doubaoConversationHistory.find(function(item) {
+        return item.id === messageId;
+      });
+      if (!message || message.type !== 'text') return false;
+
+      const textEl = document.querySelector('[data-doubao-message-id="' + messageId + '"] .assistant-message-text');
+      const bubbleEl = document.querySelector('[data-doubao-message-id="' + messageId + '"]');
+      if (!textEl || !bubbleEl) return false;
+
+      textEl.textContent = message.content || '';
+      bubbleEl.classList.toggle('pending', !!message.pending);
+      bubbleEl.classList.toggle('is-empty', !String(message.content || '').trim());
+      scrollDoubaoMessagesToBottom();
+      return true;
+    }
+
+    function updateDoubaoMessage(messageId, updates) {
+      const index = doubaoConversationHistory.findIndex(function(item) {
+        return item.id === messageId;
+      });
+      if (index < 0) return;
+      doubaoConversationHistory[index] = Object.assign({}, doubaoConversationHistory[index], updates || {});
+      if (!patchDoubaoMessageDom(messageId)) {
+        renderDoubaoConversation();
+      }
+    }
+
+    function setDoubaoImagePreview(file, dataUrl) {
+      doubaoImageFile = file || null;
+      doubaoImageDataUrl = dataUrl || '';
+    }
+
+    function clearDoubaoImageContext() {
+      const input = document.getElementById('doubaoImageInput');
+      setDoubaoImagePreview(null, '');
+      if (input) input.value = '';
+    }
+
+    function autosizeDoubaoQuestion() {
+      const input = document.getElementById('doubaoQuestion');
+      if (!input) return;
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 180) + 'px';
+    }
+
+    async function handleDoubaoImageChange(event) {
+      const file = event.target.files[0] || null;
+      hideStatus('doubaoStatus');
+
+      if (!file) {
+        setDoubaoImagePreview(null, '');
+        return;
+      }
+
+      try {
+        const dataUrl = await fileToDataUri(file);
+        setDoubaoImagePreview(file, dataUrl);
+        appendDoubaoMessage('user', '', 'image', {
+          imageUrl: dataUrl,
+          fileName: file.name
+        });
+      } catch (error) {
+        setDoubaoImagePreview(null, '');
+        showStatus('doubaoStatus', 'error', '⚠️ 图片读取失败，请换一张再试。', false);
+      }
+    }
+
+    async function submitDoubaoMultimodal() {
+      const input = document.getElementById('doubaoQuestion');
+      const question = input.value.trim();
+      const button = document.getElementById('doubaoSubmitBtn');
+
+      hideStatus('doubaoStatus');
+
+      if (!question) {
+        showStatus('doubaoStatus', 'error', '⚠️ 请输入问题。', false);
+        input.focus();
+        return;
+      }
+
+      const pendingHistory = getDoubaoTextHistory();
+      appendDoubaoMessage('user', question);
+      input.value = '';
+      autosizeDoubaoQuestion();
+      input.focus();
+      const pendingMessageId = appendDoubaoMessage('assistant', '', 'text', {
+        pending: true
+      });
+
+      button.disabled = true;
+      hideStatus('doubaoStatus');
+
+      try {
+        const res = await fetchWithLocalProxy('/api/doubao/multimodal', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'text/event-stream, application/json'
+          },
+          body: JSON.stringify({
+            question: question,
+            image: doubaoImageDataUrl,
+            history: pendingHistory,
+            stream: true
+          })
+        }, '创意辅助');
+
+        if (!res.ok) {
+          let message = '豆包回答失败';
+          try {
+            const json = await res.json();
+            if (json && json.error) message = json.error;
+          } catch {
+            try {
+              const text = await res.text();
+              if (text) message = text;
+            } catch {}
+          }
+          throw new Error(message);
+        }
+
+        const contentType = (res.headers.get('content-type') || '').toLowerCase();
+        let answer = '';
+
+        if (contentType.includes('text/event-stream')) {
+          answer = await consumeDoubaoStreamResponse(res, pendingMessageId);
+        } else {
+          const json = await res.json();
+          answer = (json && json.answer) ? String(json.answer).trim() : '';
+        }
+
+        if (!answer) {
+          throw new Error('模型已返回结果，但 answer 为空');
+        }
+
+        updateDoubaoMessage(pendingMessageId, {
+          content: answer,
+          pending: false
+        });
+        hideStatus('doubaoStatus');
+      } catch (error) {
+        updateDoubaoMessage(pendingMessageId, {
+          content: '生成失败：' + (error.message || '豆包回答失败'),
+          pending: false
+        });
+        showStatus('doubaoStatus', 'error', '⚠️ ' + (error.message || '豆包回答失败'), false);
+      } finally {
+        button.disabled = false;
+      }
+    }
+
     function getVolcModelType(resourceId) {
       if (resourceId === 'seed-icl-2.0') return 4;
       return 1;
@@ -3020,6 +4322,15 @@
       if (event.target === this) closeSaveModal();
     });
 
+    document.getElementById('doubaoImageInput').addEventListener('change', handleDoubaoImageChange);
+    document.getElementById('doubaoQuestion').addEventListener('input', autosizeDoubaoQuestion);
+    document.getElementById('doubaoQuestion').addEventListener('keydown', function(event) {
+      if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+        event.preventDefault();
+        submitDoubaoMultimodal();
+      }
+    });
+
     document.getElementById('loginPassword').addEventListener('input', function() {
       updateAuthPasswordUi();
       setAuthError('');
@@ -3038,6 +4349,25 @@
         event.preventDefault();
         login();
       }
+    });
+    window.addEventListener('popstate', function(event) {
+      const state = getAppStateFromHistory(event.state);
+      const hashView = getAppViewFromHash(location.hash);
+
+      if (!isAuthenticated) {
+        applyAuthUiState(false, {
+          historyMode: 'replace'
+        });
+        return;
+      }
+
+      const targetView = state && state.authenticated
+        ? normalizeAppView(state.view)
+        : (hashView && hashView !== 'login' ? normalizeAppView(hashView) : 'home');
+
+      switchAppView(targetView, {
+        skipHistory: true
+      });
     });
 
     async function generateSpeech() {
@@ -3257,6 +4587,8 @@
       renderProviderSelector();
       renderDrawer();
       updateCharCount();
+      renderDoubaoConversation();
+      autosizeDoubaoQuestion();
       updateAuthPasswordUi();
       document.getElementById('cloneHint').textContent = PROVIDERS[selectedProvider].cloneHint;
       await checkAuthStatus();
