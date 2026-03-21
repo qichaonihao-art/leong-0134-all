@@ -498,14 +498,16 @@
     }
     .auth-entry {
       margin-top: 0;
+      position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 9px;
+      min-height: 74px;
     }
     .auth-password-shell {
       position: relative;
       width: clamp(210px, var(--auth-width, 256px), 480px);
+      margin: 0 auto;
       border-radius: 21px;
       overflow: hidden;
       background:
@@ -609,6 +611,10 @@
       color: transparent;
     }
     .auth-login-btn {
+      position: absolute;
+      top: 50%;
+      left: calc(50% + (clamp(210px, var(--auth-width, 256px), 480px) / 2) + 14px);
+      transform: translateY(-50%);
       height: 48px;
       padding: 0 18px;
       border: 1px solid rgba(255,255,255,0.2);
@@ -624,18 +630,18 @@
         inset 0 1px 0 rgba(255,255,255,0.22),
         0 10px 24px rgba(41,118,105,0.16);
       cursor: pointer;
-      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, left 0.18s ease;
       flex-shrink: 0;
     }
     .auth-login-btn:hover {
-      transform: translateY(-1px);
+      transform: translateY(calc(-50% - 1px));
       border-color: rgba(255,255,255,0.3);
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,0.28),
         0 16px 32px rgba(41,118,105,0.22);
     }
     .auth-login-btn:active {
-      transform: translateY(0);
+      transform: translateY(-50%);
     }
     .auth-error {
       min-height: 20px;
@@ -2367,8 +2373,17 @@
       .auth-card { padding: 18px 12px 16px; }
       .auth-rabbit { width: 204px; height: 170px; }
       .auth-password-shell { max-width: calc(100vw - 52px); }
-      .auth-entry { gap: 8px; }
-      .auth-login-btn { padding: 0 14px; }
+      .auth-entry {
+        min-height: auto;
+        gap: 8px;
+      }
+      .auth-login-btn {
+        position: static;
+        left: auto;
+        top: auto;
+        transform: none;
+        padding: 0 14px;
+      }
       .topbar { flex-direction: column; }
       .workspace-topbar { flex-direction: column; }
       .workspace-tools { justify-content: flex-start; }
