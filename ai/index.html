@@ -498,16 +498,18 @@
     }
     .auth-entry {
       margin-top: 0;
-      position: relative;
-      display: flex;
+      display: grid;
+      grid-template-columns: 108px auto 108px;
       justify-content: center;
       align-items: center;
+      column-gap: 12px;
       min-height: 74px;
     }
     .auth-password-shell {
+      grid-column: 2;
       position: relative;
-      width: clamp(210px, var(--auth-width, 256px), 480px);
-      margin: 0 auto;
+      width: 256px;
+      margin: 0;
       border-radius: 21px;
       overflow: hidden;
       background:
@@ -521,9 +523,8 @@
         inset 0 -8px 16px rgba(148,163,184,0.06),
         0 10px 24px rgba(15,23,42,0.10),
         0 2px 10px rgba(148,163,184,0.10);
-      transition: width 0.22s ease, transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
       cursor: text;
-      will-change: width;
     }
     .auth-password-shell.is-focused {
       transform: translateY(-1px);
@@ -611,10 +612,8 @@
       color: transparent;
     }
     .auth-login-btn {
-      position: absolute;
-      top: 50%;
-      left: calc(50% + (clamp(210px, var(--auth-width, 256px), 480px) / 2) + 14px);
-      transform: translateY(-50%);
+      grid-column: 3;
+      justify-self: start;
       height: 48px;
       padding: 0 18px;
       border: 1px solid rgba(255,255,255,0.2);
@@ -630,18 +629,18 @@
         inset 0 1px 0 rgba(255,255,255,0.22),
         0 10px 24px rgba(41,118,105,0.16);
       cursor: pointer;
-      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, left 0.18s ease;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
       flex-shrink: 0;
     }
     .auth-login-btn:hover {
-      transform: translateY(calc(-50% - 1px));
+      transform: translateY(-1px);
       border-color: rgba(255,255,255,0.3);
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,0.28),
         0 16px 32px rgba(41,118,105,0.22);
     }
     .auth-login-btn:active {
-      transform: translateY(-50%);
+      transform: translateY(0);
     }
     .auth-error {
       min-height: 20px;
@@ -2374,14 +2373,13 @@
       .auth-rabbit { width: 204px; height: 170px; }
       .auth-password-shell { max-width: calc(100vw - 52px); }
       .auth-entry {
+        display: flex;
         min-height: auto;
         gap: 8px;
       }
       .auth-login-btn {
-        position: static;
-        left: auto;
-        top: auto;
-        transform: none;
+        grid-column: auto;
+        justify-self: auto;
         padding: 0 14px;
       }
       .topbar { flex-direction: column; }
@@ -2950,10 +2948,8 @@
       const valueLength = input.value.length;
       const displayCount = valueLength;
       const fillRatio = Math.min(valueLength / 10, 1);
-      const width = Math.max(256, Math.min(480, 208 + valueLength * 24));
 
       shell.style.setProperty('--auth-fill', String(fillRatio));
-      shell.style.setProperty('--auth-width', width + 'px');
       overlay.innerHTML = '';
 
       for (let i = 0; i < displayCount; i += 1) {
