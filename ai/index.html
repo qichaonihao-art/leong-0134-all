@@ -3541,7 +3541,8 @@
       document.getElementById('num3').textContent = '🚩';
       hideStatus('status1');
       hideStatus('status2');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      toggleProviderPanel(true);
+      document.getElementById('card0').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     document.getElementById('fileInput').addEventListener('change', async function(event) {
