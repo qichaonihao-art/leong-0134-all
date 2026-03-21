@@ -1,4 +1,5 @@
 import { createServer } from 'node:http';
+import { existsSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 import path from 'node:path';
@@ -7,13 +8,28 @@ import { WebSocket } from 'ws';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const AI_DIR = path.join(__dirname, 'ai');
+const LEGACY_FRONTEND_DIR = path.join(__dirname, 'ai');
+const REACT_FRONTEND_DIR = path.join(__dirname, 'aether-workspace-ai', 'dist');
+const FRONTEND_MODE = String(process.env.FRONTEND_MODE || 'legacy').trim().toLowerCase();
 const PORT = Number(process.env.PORT || 3000);
-const HOST = process.env.HOST || '127.0.0.1';
+// Default to all interfaces so a cloud host can expose the service without
+// requiring an extra HOST override. Local-only access still works via
+// http://127.0.0.1:3000.
+const HOST = process.env.HOST || '0.0.0.0';
 const CORS_ALLOW_ORIGIN = process.env.CORS_ALLOW_ORIGIN || '*';
 const APP_LOGIN_PASSWORD = process.env.APP_LOGIN_PASSWORD || '';
 const AUTH_COOKIE_NAME = 'auth_token';
 const authSessions = new Map();
+const SHOULD_USE_REACT_FRONTEND = FRONTEND_MODE === 'react';
+const ACTIVE_FRONTEND_DIR = SHOULD_USE_REACT_FRONTEND ? REACT_FRONTEND_DIR : LEGACY_FRONTEND_DIR;
+const FALLBACK_FRONTEND_DIR = SHOULD_USE_REACT_FRONTEND ? LEGACY_FRONTEND_DIR : REACT_FRONTEND_DIR;
+const HAS_ACTIVE_FRONTEND_DIR = existsSync(ACTIVE_FRONTEND_DIR);
+const HAS_FALLBACK_FRONTEND_DIR = existsSync(FALLBACK_FRONTEND_DIR);
+const RESOLVED_FRONTEND_DIR = HAS_ACTIVE_FRONTEND_DIR
+  ? ACTIVE_FRONTEND_DIR
+  : (HAS_FALLBACK_FRONTEND_DIR ? FALLBACK_FRONTEND_DIR : ACTIVE_FRONTEND_DIR);
+const RESOLVED_FRONTEND_MODE = RESOLVED_FRONTEND_DIR === REACT_FRONTEND_DIR ? 'react' : 'legacy';
+const IS_REACT_FRONTEND_ACTIVE = RESOLVED_FRONTEND_MODE === 'react';
 
 const SERVER_CONFIG = {
   aliyunApiKey: process.env.ALIYUN_API_KEY || '',
@@ -40,6 +56,30 @@ const MIME_TYPES = {
 function sendJson(res, statusCode, payload) {
   res.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
   res.end(JSON.stringify(payload));
+}
+
+function hasFileExtension(pathname) {
+  return !!path.extname(String(pathname || ''));
+}
+
+function shouldServeSpaFallback(pathname) {
+  return IS_REACT_FRONTEND_ACTIVE && !hasFileExtension(pathname);
+}
+
+function logFrontendSelection() {
+  const requestedMode = FRONTEND_MODE === 'react' || FRONTEND_MODE === 'legacy' ? FRONTEND_MODE : 'legacy';
+  const requestedDir = requestedMode === 'react' ? REACT_FRONTEND_DIR : LEGACY_FRONTEND_DIR;
+
+  console.log(`[frontend] requested mode: ${requestedMode}`);
+  console.log(`[frontend] requested dir: ${requestedDir}`);
+
+  if (!HAS_ACTIVE_FRONTEND_DIR && HAS_FALLBACK_FRONTEND_DIR) {
+    console.warn(`[frontend] requested directory is missing, falling back to ${RESOLVED_FRONTEND_MODE}: ${RESOLVED_FRONTEND_DIR}`);
+    return;
+  }
+
+  console.log(`[frontend] serving mode: ${RESOLVED_FRONTEND_MODE}`);
+  console.log(`[frontend] serving dir: ${RESOLVED_FRONTEND_DIR}`);
 }
 
 function getAllowedOrigin(origin) {
@@ -1412,9 +1452,9 @@ async function handleDoubaoMultimodal(req, res) {
 
 async function serveStatic(req, res, pathname) {
   let targetPath = pathname === '/' ? '/index.html' : pathname;
-  const filePath = path.normalize(path.join(AI_DIR, targetPath));
+  const filePath = path.normalize(path.join(RESOLVED_FRONTEND_DIR, targetPath));
 
-  if (!filePath.startsWith(AI_DIR)) {
+  if (!filePath.startsWith(RESOLVED_FRONTEND_DIR)) {
     sendJson(res, 403, { error: '禁止访问' });
     return;
   }
@@ -1429,6 +1469,15 @@ async function serveStatic(req, res, pathname) {
     res.writeHead(200, { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' });
     res.end(content);
   } catch {
+    if (shouldServeSpaFallback(pathname)) {
+      const fallbackPath = path.join(RESOLVED_FRONTEND_DIR, 'index.html');
+      try {
+        const content = await readFile(fallbackPath);
+        res.writeHead(200, { 'Content-Type': MIME_TYPES['.html'] });
+        res.end(content);
+        return;
+      } catch {}
+    }
     sendJson(res, 404, { error: '文件不存在' });
   }
 }
@@ -1503,5 +1552,6 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(PORT, HOST, () => {
+  logFrontendSelection();
   console.log(`Server running at http://${HOST}:${PORT}`);
 });

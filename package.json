@@ -4,7 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node --env-file=.env server.mjs"
+    "start": "node --env-file=.env server.mjs",
+    "start:react": "FRONTEND_MODE=react node --env-file=.env server.mjs",
+    "start:legacy": "FRONTEND_MODE=legacy node --env-file=.env server.mjs",
+    "dev:frontend": "npm --prefix aether-workspace-ai run dev",
+    "build:frontend": "npm --prefix aether-workspace-ai run build",
+    "lint:frontend": "npm --prefix aether-workspace-ai run lint",
+    "build": "npm run build:frontend",
+    "preview:react": "npm run build && npm run start:react"
   },
   "dependencies": {
     "ws": "^8.18.0"

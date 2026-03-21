@@ -4,7 +4,7 @@ window.APP_CONFIG = {
   // 留空时：
   // 1. 本地通过 npm start 打开页面，会继续走当前域名下的 /api/*
   // 2. 直接双击 html 或 file:// 调试时，会回退到 http://127.0.0.1:3000
-  proxyBaseUrl: 'https://voice.kelongai.xyz',
+  proxyBaseUrl: '',
 
   // 如果线上代理已经在服务器环境变量中配置了阿里云 / 火山密钥，
   // 可改为 true，这样前端可不再要求用户手动输入这些密钥。

@@ -1,129 +1,242 @@
 # 部署说明
 
-## 当前部署边界
+## 当前推荐结构
 
-- 前端：部署到 Vercel，只负责页面展示、浏览器本地存储、调用接口。
-- 代理：部署到香港云服务器，负责转发阿里云和火山引擎相关请求。
-- 智谱：当前仍由前端直连官方接口，保持现有链路不变。
-- 阿里云 / 火山：前端统一通过代理地址访问，不再在页面里写死多个 `/api/*` 地址。
+- 前端主工程：`aether-workspace-ai/`
+- 新前端构建产物：`aether-workspace-ai/dist/`
+- 旧前端回滚备份：`ai/`
+- 后端与静态资源服务：`server.mjs`
+- 线上访问链路：`Nginx -> Node(server.mjs) -> /api + 前端静态资源`
 
-## 一、前端部署到 Vercel
+当前建议不再把前端单独部署到 Vercel，而是让现有 Node 统一提供：
 
-### 1. 需要准备
+- React 新前端静态页面
+- 登录、声音克隆、豆包助手接口
 
-- 代码仓库已包含 `vercel.json`
-- 前端统一配置文件是 `ai/app-config.js`
+这样浏览器访问、Cookie 登录态、`/api/*` 同源调用都会更稳定。
 
-### 2. 上线前修改前端配置
+---
 
-编辑 `ai/app-config.js`：
+## 一、前端模式切换
 
-```js
-window.APP_CONFIG = {
-  proxyBaseUrl: 'https://your-proxy-domain.com',
-  useServerManagedSecrets: true
-};
+`server.mjs` 现在支持两套前端目录：
+
+- 新前端：`aether-workspace-ai/dist`
+- 旧前端：`ai/`
+
+通过环境变量控制：
+
+```bash
+FRONTEND_MODE=react
+```
+
+或：
+
+```bash
+FRONTEND_MODE=legacy
 ```
 
 说明：
 
-- `proxyBaseUrl`：填你香港服务器上的代理域名
-- `useServerManagedSecrets`：
-  - `false`：前端继续要求用户手动填写阿里云 / 火山密钥
-  - `true`：前端默认认为密钥已放到代理服务器环境变量里
+- `react`：优先提供 React 构建产物
+- `legacy`：继续提供旧 `ai/` 页面
+- 如果指定的目录不存在，`server.mjs` 会自动回退到另一套可用前端
 
-### 3. Vercel 部署方式
+推荐策略：
 
-把当前仓库连接到 Vercel，直接部署即可。
+- 本地迁移验证阶段：先用 `legacy`
+- 确认 React 前端可用后：线上改成 `react`
+- 如果线上临时回滚：把 `FRONTEND_MODE` 改回 `legacy`，重启 PM2 即可
 
-本项目已通过 `vercel.json` 把根路径指向 `ai/index.html`。
+---
 
-部署完成后，你会得到类似：
+## 二、本地开发方式
 
-```text
-https://your-project.vercel.app
+### 1. 双进程开发
+
+适合日常改 UI 和联调：
+
+启动后端：
+
+```bash
+HOST=127.0.0.1 npm start
 ```
 
-## 二、代理部署到云服务器
+启动 React 前端：
 
-### 1. 服务器需要准备
+```bash
+cd aether-workspace-ai
+npm install
+npm run dev
+```
 
-- Node.js 18+，建议 Node.js 20 或更高
-- 可访问外网
-- 一个域名或子域名，指向这台服务器
+打开：
 
-### 2. 上传并启动代理
+```text
+http://127.0.0.1:5173
+```
 
-服务器上只需要这几类文件：
+说明：
 
-- `server.mjs`
-- `package.json`
-- `package-lock.json`
-- `ai/` 目录
+- React 开发环境会把 `/api/*` 代理到本地 Node
+- 这样不用改后端接口路径
 
-安装依赖：
+### 2. 本地预发布验证
+
+适合验证“真实部署形态”：
+
+先在根目录执行：
+
+```bash
+npm run build
+```
+
+然后设置：
+
+```bash
+FRONTEND_MODE=react
+HOST=127.0.0.1 npm start
+```
+
+打开：
+
+```text
+http://127.0.0.1:3000
+```
+
+这时就是：
+
+- Node 提供 React `dist`
+- Node 提供 `/api/*`
+
+和线上结构一致。
+
+---
+
+## 三、服务器部署方式
+
+### 1. 服务器准备
+
+- Node.js 18+，建议 Node.js 20+
+- Nginx
+- PM2
+
+### 2. 代码部署后安装依赖
+
+根目录安装后端依赖：
 
 ```bash
 npm install
 ```
 
-复制环境变量模板：
+前端目录安装依赖：
 
 ```bash
-cp .env.example .env
+cd aether-workspace-ai
+npm install
+cd ..
 ```
 
-然后按实际情况填写 `.env`。
+### 3. 构建新前端
 
-启动：
+在根目录执行：
 
 ```bash
-HOST=0.0.0.0 npm start
+npm run build
 ```
 
-建议后续再用 `pm2` 或 `systemd` 托管进程。
+该命令会执行：
 
-## 三、代理需要的环境变量
+- `aether-workspace-ai` 的 `vite build`
+- 产出 `aether-workspace-ai/dist`
 
-参考 `.env.example`：
+### 4. 配置环境变量
 
-- `PORT`：代理监听端口
-- `HOST`：建议服务器上用 `0.0.0.0`
-- `CORS_ALLOW_ORIGIN`：允许访问代理的前端域名
-- `ALIYUN_API_KEY`：阿里云密钥
-- `VOLCENGINE_APP_KEY`：火山 App Key
-- `VOLCENGINE_ACCESS_KEY`：火山 Access Key
-- `VOLCENGINE_SPEAKER_ID`：可选，固定 speaker_id 时再填
+至少需要这些：
+
+- `PORT`
+- `HOST`
+- `FRONTEND_MODE=react`
+- `CORS_ALLOW_ORIGIN`
+- `APP_LOGIN_PASSWORD`
+- `ARK_API_KEY`
+- `ALIYUN_API_KEY`
+- `VOLCENGINE_APP_KEY`
+- `VOLCENGINE_ACCESS_KEY`
+- `VOLCENGINE_SPEAKER_ID` 可选
+
+### 5. 启动 Node
+
+```bash
+npm start
+```
+
+建议用 PM2：
+
+```bash
+pm2 start "npm start" --name liangsousou
+```
+
+---
+
+## 四、Nginx 结构
+
+Nginx 不再直接提供前端文件，只做反向代理：
+
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
 
 说明：
 
-- 如果这些环境变量已经配置好，前端就可以把 `useServerManagedSecrets` 设为 `true`
-- 即使配置了环境变量，代理也兼容从前端请求体读取密钥，方便本地调试
+- 页面静态资源由 Node 提供
+- `/api/*` 也由 Node 提供
+- 登录 Cookie、前端路由 fallback 都由同一个 Node 服务统一处理
 
-## 四、前端如何连接线上代理
+---
 
-前端只认一个统一入口：
+## 五、回滚方式
 
-- `ai/app-config.js` 里的 `proxyBaseUrl`
-- 页面里的“代理服务”配置项 `cfgProxyBaseUrl`
+如果新前端上线后需要回滚，不用删 React 工程，也不用恢复旧代码。
 
-优先级：
+只需要：
 
-1. 页面里手动填写的代理地址
-2. `ai/app-config.js` 里的 `proxyBaseUrl`
-3. 本地自动回退逻辑
+1. 把环境变量改成：
 
-这意味着：
+```bash
+FRONTEND_MODE=legacy
+```
 
-- 本地开发时可以不填，继续用 `npm start`
-- 线上部署时只需要把 `proxyBaseUrl` 改成你的代理域名
-- 不需要在多个接口调用处分别改地址
+2. 重启 PM2 / Node
 
-## 五、当前代理已覆盖的链路
+这样服务就会重新从 `ai/` 提供旧前端。
 
-- 阿里云音色创建：`POST /api/voice/aliyun`
-- 阿里云语音生成：`POST /api/tts/aliyun`
-- 火山音色训练：`POST /api/voice/volcengine`
-- 火山语音生成：`POST /api/tts/volcengine`
+---
 
-这四条链路都已为“前端在 Vercel、代理在独立服务器”这种架构准备好。
+## 六、当前状态
+
+当前仓库已经形成：
+
+- React 新前端：`aether-workspace-ai/`
+- 旧前端备份：`ai/`
+- Node 后端：`server.mjs`
+
+推荐上线步骤：
+
+1. 本地 `npm run build`
+2. 本地 `FRONTEND_MODE=react npm start` 验证
+3. 服务器构建前端
+4. 服务器设置 `FRONTEND_MODE=react`
+5. PM2 重启
+6. 如有异常，切回 `FRONTEND_MODE=legacy`
